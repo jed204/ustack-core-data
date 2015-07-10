@@ -173,7 +173,7 @@ public class SearchFilters {
 				if (start != null && end == null)
 					search.put(filter.getSqlField(), new BasicDBObject("$gte", start));
 				else if (start == null && end != null)
-					search.put(filter.getSqlField(), new BasicDBObject("$lte", start));
+					search.put(filter.getSqlField(), new BasicDBObject("$lte", end));
 				else if (start != null && end != null)
 					search.put(filter.getSqlField(), new BasicDBObject("$gte", start).append("$lte", end));
 			}
@@ -192,6 +192,9 @@ public class SearchFilters {
 						break;
 					case NotLike:
 						search.put(filter.getSqlField(), new BasicDBObject("$not", Pattern.compile(".*" + value.toString() + ".*", Pattern.CASE_INSENSITIVE)));
+						break;
+					case In:
+						search.put(filter.getSqlField(), new BasicDBObject("$in", value));
 						break;
 					case NotEquals:
 						search.put(filter.getSqlField(), new BasicDBObject("$ne", value));
@@ -274,6 +277,7 @@ public class SearchFilters {
 		EqualsGreaterThan,
 		LessThan,
 		GreaterThan,
+		In,
 		Exists,
 		NotExists;
 		

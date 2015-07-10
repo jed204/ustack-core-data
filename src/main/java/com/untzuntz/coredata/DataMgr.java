@@ -430,6 +430,9 @@ public class DataMgr {
 	    	} catch (Exception e) {}
     	}
     	
+//    	if (checkType != null)
+//    		System.err.println(fieldName + " => checkType = " + checkType.getClass().getSimpleName() + " | " + value);
+    	
     	if (checkType instanceof BaseData)
     	{
     		paramType = checkType.getClass();
@@ -488,7 +491,7 @@ public class DataMgr {
     		
     		if (!(value instanceof DBObject))
     			value = getObjectFromDBObject(f.getType(), (DBObject)value);
-    		
+
     		paramType = DBObject.class;
     	}
     	else if (value instanceof Number)
@@ -889,14 +892,25 @@ public class DataMgr {
 	 */
 	public static List<Field> getFields(DBTableMap tbl, Object obj)
 	{
-		List<Field> fields = new ArrayList<Field>(Arrays.asList(obj.getClass().getDeclaredFields()));
+		return getFields(tbl, obj.getClass());
+	}
+	
+	/**
+	 * Returns all fields from the object (and super classes if configured to do so)
+	 * @param tbl
+	 * @param obj
+	 * @return
+	 */
+	public static List<Field> getFields(DBTableMap tbl, Class cls)
+	{
+		List<Field> fields = new ArrayList<Field>(Arrays.asList(cls.getDeclaredFields()));
 		
 		if (tbl == null)
-			tbl = obj.getClass().getAnnotation(DBTableMap.class);
+			tbl = (DBTableMap)cls.getAnnotation(DBTableMap.class);
 		
 		if (tbl != null && tbl.includeParent())
 		{
-			Class superCls = obj.getClass().getSuperclass();
+			Class superCls = cls.getSuperclass();
 			while (superCls != null)
 			{
 				fields.addAll(Arrays.asList(superCls.getDeclaredFields()));
@@ -1064,10 +1078,10 @@ public class DataMgr {
 		}
 
 		StringBuffer buf = new StringBuffer();
-		final Field[] fields = cls.getDeclaredFields();
+		List<Field> fields = getFields(tblMap, cls);
+		
 		boolean added = false;
-		for (int i = 0; i < fields.length; i++) {
-			final Field f = fields[i];
+		for (Field f : fields) {
 			DBFieldMap map = f.getAnnotation(DBFieldMap.class);
 			if (map == null)
 			{

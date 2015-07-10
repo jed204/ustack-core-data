@@ -154,6 +154,49 @@ public class JsonQuery {
 					if (hasValue == filterValue)
 						passed++;					
 				}
+				else if ("$contains".equals(key) || "$doesNotContain".equals(key))
+				{
+					boolean checkPassed = false;
+					String strVal = filter.toString();
+					if (inboundKey.indexOf("..") > -1)
+					{
+						List<Object> values = JsonPath.read(document, "$." + inboundKey);
+						for (Object v : values) {
+							if ("$doesNotContain".equals(key))
+							{
+								if (v == null || !v.toString().contains(strVal))
+									checkPassed = true;
+							}
+							else
+							{
+								if (v != null && v.toString().contains(strVal))
+									checkPassed = true;
+							}
+						}
+					}
+					else
+					{
+						Object checkVal = null;
+						try {
+							checkVal = JsonPath.read(document, "$." + inboundKey);
+						} catch (PathNotFoundException pne) {}
+						
+						if ("$doesNotContain".equals(key))
+						{
+							if (checkVal == null || !checkVal.toString().contains(strVal))
+								checkPassed = true;
+						}
+						else
+						{
+							if (checkVal != null && checkVal.toString().contains(strVal))
+								checkPassed = true;
+						}
+					}
+					if (checkPassed)
+					{
+						passed++;
+					}
+				}
 				else if ("$lte".equals(key) || "$lt".equals(key) || "$gte".equals(key) || "$gt".equals(key))
 				{
 					Number filterValue = (Number)filter;

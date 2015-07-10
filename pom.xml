@@ -4,7 +4,7 @@
     <groupId>com.untzuntz.ustack</groupId>
     <artifactId>ustack-core-data-java</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.24</version>
+    <version>1.0.30</version>
     <name>ustack-core-data-java</name>
 	<licenses>
 		<license>
@@ -77,19 +77,20 @@
             </resource>
         </resources>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>sign-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.4</version>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -119,6 +120,9 @@
                         <goals>
                             <goal>jar</goal>
                         </goals>
+                                                <configuration>
+                                        <additionalparam>-Xdoclint:none</additionalparam>
+                                    </configuration>
                     </execution>
                 </executions>
             </plugin>

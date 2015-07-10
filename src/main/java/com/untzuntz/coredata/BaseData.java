@@ -92,7 +92,7 @@ abstract public class BaseData {
 					}
 					object = list;
 				}	
-			} else
+			} else {
 				try {
 					object = f.get(sourceObject);
 				} catch (IllegalArgumentException e1) {
@@ -100,7 +100,8 @@ abstract public class BaseData {
 				} catch (IllegalAccessException e1) {
 					// stub - we have marked the field accessible above
 				}
-
+			}
+			
 			if (object == null)
 				continue;
 			

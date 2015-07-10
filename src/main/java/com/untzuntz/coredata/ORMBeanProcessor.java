@@ -411,12 +411,19 @@ public class ORMBeanProcessor {
 			pkMap.put(listType, pks);
 		}
 
+		boolean addToList = false;
 		// check for existance of PK
 		if (!pks.contains( lPk.getValue() ))
 		{	
 			// we don't have the PK yet - so let's add it
 			pks.add(lPk.getValue());
+			addToList = true;
+		}
+		else if (o instanceof MultiKeyBase) {
+			addToList = true;
+		}
 
+		if (addToList) {
 		    List inList = (List)f.get(parentBean);
 		    if (inList == null)
 		    {
