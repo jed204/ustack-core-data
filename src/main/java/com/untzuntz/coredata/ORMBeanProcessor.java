@@ -164,10 +164,9 @@ public class ORMBeanProcessor {
 		{
 			fieldsToLoad = new ArrayList<Field>();
 
-			final Field[] fields = type.getDeclaredFields();
-			for (int i = 0; i < fields.length; i++)
+			List<Field> fields = DataMgr.getFields(null, type);
+			for (Field f : fields)
 			{
-				final Field f = fields[i];
 				f.setAccessible(true);
 				
 				DBFieldMap map = f.getAnnotation(DBFieldMap.class);
@@ -194,10 +193,9 @@ public class ORMBeanProcessor {
 		{
 			fieldToSet = new ArrayList<FieldMap>();
 			
-			final Field[] fields = type.getDeclaredFields();
-			for (int i = 0; i < fields.length; i++)
+			List<Field> fields = DataMgr.getFields(null, type);
+			for (Field f : fields)
 			{
-				final Field f = fields[i];
 				f.setAccessible(true);
 
 				DBFieldMap map = f.getAnnotation(DBFieldMap.class);
@@ -289,7 +287,7 @@ public class ORMBeanProcessor {
      * @throws IllegalAccessException 
      * @throws IllegalArgumentException 
      */
-	private <T> T createBean(ResultSet rs, Class<T> type, HashMap<Class,List<Field>> fieldToLoadCache, String parentPk, String parentPkField) throws SQLException, UnknownPrimaryKeyException, IllegalArgumentException, IllegalAccessException {
+	public <T> T createBean(ResultSet rs, Class<T> type, HashMap<Class,List<Field>> fieldToLoadCache, String parentPk, String parentPkField) throws SQLException, UnknownPrimaryKeyException, IllegalArgumentException, IllegalAccessException {
 
 		// The prefix to look for based on the class type
 		String tblPrefix = getTablePrefix(type);
