@@ -87,8 +87,9 @@ abstract public class BaseData {
 						}
 						else if (o instanceof BasicDBObject)
 							list.add((DBObject)o);
-						else
-							list.add(o.toString());
+						else {
+							list.add(o);
+						}
 					}
 					object = list;
 				}	

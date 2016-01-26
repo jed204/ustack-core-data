@@ -162,7 +162,7 @@ public class SearchFilters {
 		DBObject search = new BasicDBObject();
 		for (FilterEntry filter : filters)
 		{
-			//logger.info(String.format("%s [%s] %s", filter.getSqlField(), filter.getType().name(), filter.getValue()));
+			logger.info(String.format("%s [%s] %s", filter.getSqlField(), filter.getType().name(), filter.getValue()));
 			Object value = filter.getValue();
 			
 			if (value instanceof DateRange)

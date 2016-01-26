@@ -1,5 +1,8 @@
 package com.untzuntz.coredata.json;
 
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -21,9 +24,15 @@ public class JsonQuery {
 
     static Logger           		logger               	= Logger.getLogger(JsonQuery.class);
 
+    private List<String> reasons;
 	private BasicDBList filters;
 	private FilterMode mode;
 	private Object document;
+	private DecimalFormat df = new DecimalFormat("0.0");
+	
+	public List<String> getReasons() {
+		return reasons;
+	}
 
 	public JsonQuery(BasicDBList obj, FilterMode mode) {
 		this(obj);
@@ -37,6 +46,27 @@ public class JsonQuery {
 
 	public void setDocument(Object doc) {
 		document = doc;
+	}
+	
+	public void addReasons(List<String> re) {
+		if (re == null)
+			return;
+		
+		if (reasons == null)
+			reasons = new ArrayList<String>();
+		
+		reasons.addAll(re);
+	}
+	
+	public void addReason(String r) {
+		
+		if (r == null)
+			return;
+		
+		if (reasons == null)
+			reasons = new ArrayList<String>();
+
+		reasons.add(r);
 	}
 	
 	public boolean runCheck(DBObject doc) throws UnknownFilterKey
@@ -54,7 +84,10 @@ public class JsonQuery {
 				JsonQuery inQuery = new JsonQuery((BasicDBList)obj);
 				inQuery.setDocument(document);
 				if (inQuery.runCheck(doc))
+				{
 					passed++;
+					addReasons(inQuery.getReasons());
+				}
 				
 				logger.debug(passed + " - " + mode + " | Sub-Filter: " + obj.toString());
 			}
@@ -62,8 +95,8 @@ public class JsonQuery {
 			{
 				// Actual Query
 				DBObject filter = (DBObject)obj;
-
-				if (filterCheck(filter, null))
+				
+				if (filterCheck(filter, null, mode))
 					passed++;
 				
 				logger.debug(passed + " - " + mode + " | Filter: " + filter);
@@ -85,11 +118,21 @@ public class JsonQuery {
 		
 	}
 	
-	private boolean filterCheck(DBObject doc, String inboundKey) throws UnknownFilterKey
+	private boolean filterCheck(DBObject doc, String inboundKey, FilterMode mode) throws UnknownFilterKey
 	{
+		String reason = null;
+		DecimalFormat ldf = df;
+		
+		Map<String,String> reasonMap = new HashMap<String,String>();
 		Set<String> keys = doc.keySet();
 		Iterator<String> it = keys.iterator();
 		int passed = 0;
+		int expectedPass = keys.size();
+		
+		if (doc.get("$formatNumber") != null) {
+			ldf = new DecimalFormat((String)doc.get("$formatNumber"));
+		}
+
 		while (it.hasNext())
 		{
 			String key = it.next();
@@ -98,13 +141,24 @@ public class JsonQuery {
 			if (key.startsWith("$"))
 			{
 				Object filter = doc.get(key);
-				if ("$or".equals(key))
+				if ("$reason".equals(key)) {
+					reason = filter.toString();
+					expectedPass--;
+				}
+				else if ("$formatNumber".equals(key))
+				{
+					expectedPass--;
+				}
+				else if ("$or".equals(key))
 				{
 					JsonQuery inQuery = new JsonQuery((BasicDBList)filter, FilterMode.OR);
 					inQuery.setDocument(document);
 					logger.debug(mode + " | Sub-Filter: " + filter.toString());
 					if (inQuery.runCheck(doc))
+					{
 						passed++;
+						addReasons(inQuery.getReasons());
+					}
 				}
 				else if ("$elemMatch".equals(key))
 				{
@@ -128,6 +182,7 @@ public class JsonQuery {
 						{
 							//logger.info("ElemMatch Filter Passed => " + oItem);
 							passed++;
+							addReasons(jq.getReasons());
 						}
 					}
 				}
@@ -213,21 +268,25 @@ public class JsonQuery {
 							boolean thisRun = false;
 							double filterInt = filterValue.doubleValue();
 							double objectInt = objectValue.doubleValue();
-							if ("$lte".equals(key) && filterInt <= objectInt) {
+							if ("$lte".equals(key) && objectInt <= filterInt) {
 								hasValue = true;
 								thisRun = true;
+								reasonMap.put(key, ldf.format(filterInt));
 							}
-							else if ("$lt".equals(key) && filterInt < objectInt) {
+							else if ("$lt".equals(key) && objectInt < filterInt) {
 								hasValue = true;
 								thisRun = true;
+								reasonMap.put(key, ldf.format(filterInt));
 							}
 							else if ("$gte".equals(key) && objectInt >= filterInt) {
 								hasValue = true;
 								thisRun = true;
+								reasonMap.put(key, ldf.format(filterInt));
 							}
 							else if ("$gt".equals(key) && objectInt > filterInt) {
 								hasValue = true;
 								thisRun = true;
+								reasonMap.put(key, ldf.format(filterInt));
 							}
 							
 							//logger.info(key + " => " + filterInt + " vs. " + objectInt + " [" + thisRun + "]");
@@ -249,20 +308,32 @@ public class JsonQuery {
 							boolean hasValue = false;
 							double filterInt = filterValue.doubleValue();
 							double objectInt = checkVal.doubleValue();
-							if ("$lte".equals(key) && filterInt <= objectInt)
+							if ("$lte".equals(key) && objectInt <= filterInt)
+							{
 								hasValue = true;
-							else if ("$lt".equals(key) && filterInt < objectInt)
+								reasonMap.put(key, ldf.format(filterInt));
+							}
+							else if ("$lt".equals(key) && objectInt < filterInt)
+							{
 								hasValue = true;
-							else if ("$gte".equals(key) && filterInt >= objectInt)
+								reasonMap.put(key, ldf.format(filterInt));
+							}
+							else if ("$gte".equals(key) && objectInt >= filterInt)
+							{
 								hasValue = true;
-							else if ("$gt".equals(key) && filterInt > objectInt)
+								reasonMap.put(key, ldf.format(filterInt));
+							}
+							else if ("$gt".equals(key) && objectInt > filterInt)
+							{
 								hasValue = true;
-							
+								reasonMap.put(key, ldf.format(filterInt));
+							}
+
 							if (hasValue) 
 								passed++;
 						}
-						else
-							logger.warn("Could not find check value @ " + inboundKey);
+//						else
+//							logger.warn("Could not find check value @ " + inboundKey);
 					}
 				}
 				else if ("$neq".equals(key))
@@ -338,23 +409,53 @@ public class JsonQuery {
 			else if (obj instanceof DBObject)
 			{
 				DBObject filter = (DBObject)doc.get(key);
-				if (filterCheck(filter, key))
+				if (filterCheck(filter, key, FilterMode.AND))
 					passed++;
 			}
 			else
 				logger.warn("Unknown object type [" + key + "]: " + obj.getClass().getName());
 		}
 		
+		boolean ret = false;
 		if (mode.equals(FilterMode.AND))
 		{
 			// AND query
-			return passed == keys.size();
+			ret = passed == expectedPass;
 		}
 		else
 		{
 			// OR query
-			return passed > 0;
+			ret = passed > 0;
 		}
+		if (ret && reason != null)
+		{
+			// process reason
+			StringBuffer buf = new StringBuffer();
+			int startIdx = 0;
+			Iterator<String> rit = reasonMap.keySet().iterator();
+			while (rit.hasNext()) {
+				String key = rit.next();
+				
+				int keyIdx = reason.indexOf(key);
+				if (keyIdx > -1) {
+
+					buf.append(reason.substring(startIdx, keyIdx));
+					
+					// resolve key
+					String kv = reasonMap.get(key);
+					buf.append(kv);
+					
+					startIdx = keyIdx + key.length();
+				}
+				
+			}
+			
+			if (startIdx < reason.length())
+				buf.append(reason.substring(startIdx));
+			
+			addReason(buf.toString());
+		}
+		return ret;
 	}
 	
 	private boolean updateCheck(String inboundKey){

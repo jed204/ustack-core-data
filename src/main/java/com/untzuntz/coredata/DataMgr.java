@@ -833,7 +833,6 @@ public class DataMgr {
 				else if (bd instanceof BaseData)
 				{
 					DBObject tObj = ((BaseData)bd).toDBObject(true, false);
-					logger.info("saving col: " + colName + " ==> " + tObj);
 					toSave.put(colName, tObj);
 				}
 				else if (bd instanceof InternetAddress)
