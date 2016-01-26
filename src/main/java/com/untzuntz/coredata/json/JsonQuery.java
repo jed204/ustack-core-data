@@ -15,6 +15,8 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.untzuntz.coredata.exceptions.UnknownFilterKey;
 
+import net.minidev.json.JSONArray;
+
 public class JsonQuery {
 
     static Logger           		logger               	= Logger.getLogger(JsonQuery.class);
@@ -290,6 +292,13 @@ public class JsonQuery {
 						passed++;
 					}
 				}
+				else if ("$isUpdated".equals(key))
+				{
+					if (updateCheck(inboundKey))
+					{
+						passed++;
+					}
+				}
 				else
 					throw new UnknownFilterKey(key);
 			}
@@ -346,6 +355,21 @@ public class JsonQuery {
 			// OR query
 			return passed > 0;
 		}
+	}
+	
+	private boolean updateCheck(String inboundKey){
+		boolean checkPassed = false;
+
+		Object checkVal = null;
+		try {
+			checkVal = JsonPath.read(document, "$.fieldChangeList[*]." + inboundKey);
+		} catch (PathNotFoundException pne) {}
+				
+		if (checkVal != null && checkVal instanceof JSONArray && !((JSONArray)checkVal).isEmpty()){
+			checkPassed = true;
+		}
+		
+		return checkPassed;
 	}
 	
 	private static enum FilterMode {
