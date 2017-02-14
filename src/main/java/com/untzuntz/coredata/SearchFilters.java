@@ -179,6 +179,8 @@ public class SearchFilters {
 			}
 			else if (value != null)
 			{
+				String[] values = null;
+				Pattern[] fValues = null;
 				switch (filter.getType())
 				{
 					case Like:
@@ -195,6 +197,25 @@ public class SearchFilters {
 						break;
 					case In:
 						search.put(filter.getSqlField(), new BasicDBObject("$in", value));
+						break;
+					case InLike:
+						values = (String[])value;
+						fValues = new Pattern[values.length];
+						for (int q = 0; q < fValues.length; q++) {
+							fValues[q] = Pattern.compile(".*" + values[q].trim() + ".*", Pattern.CASE_INSENSITIVE);
+						}
+						search.put(filter.getSqlField(), new BasicDBObject("$in", fValues));
+						break;
+					case All:
+						search.put(filter.getSqlField(), new BasicDBObject("$all", value));
+						break;
+					case AllLike:
+						values = (String[])value;
+						fValues = new Pattern[values.length];
+						for (int q = 0; q < fValues.length; q++) {
+							fValues[q] = Pattern.compile(".*" + values[q].trim() + ".*", Pattern.CASE_INSENSITIVE);
+						}
+						search.put(filter.getSqlField(), new BasicDBObject("$all", fValues));
 						break;
 					case NotEquals:
 						search.put(filter.getSqlField(), new BasicDBObject("$ne", value));
@@ -278,6 +299,9 @@ public class SearchFilters {
 		LessThan,
 		GreaterThan,
 		In,
+		InLike,
+		All,
+		AllLike,
 		Exists,
 		NotExists;
 		
