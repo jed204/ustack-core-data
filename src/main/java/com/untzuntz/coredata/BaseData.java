@@ -1,5 +1,15 @@
 package com.untzuntz.coredata;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
+import com.untzuntz.coredata.anno.DBFieldMap;
+import org.bson.BasicBSONObject;
+import org.bson.types.ObjectId;
+
+import java.beans.Transient;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -10,16 +20,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
-
-import org.bson.BasicBSONObject;
-import org.bson.types.ObjectId;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
-import com.untzuntz.coredata.anno.DBFieldMap;
 
 /**
  * A core element to support the API responses such as JSON output
@@ -53,46 +53,46 @@ abstract public class BaseData {
 	{
 		DBObject obj = new BasicDBObject();
 
-		final Field[] fields = sourceObject.getClass().getDeclaredFields();
-		for (int i = 0; i < fields.length; i++) {
-			final Field f = fields[i];
-			
+		final List<Field> fields = ReflectionUtil.getFields(sourceObject.getClass());
+		for (final Field f : fields) {
 			String fieldName = f.getName();
 			f.setAccessible(true);
-			
+
 			Object object = null;
-			
-			if (f.getType().equals(List.class))
-			{
+
+			DBFieldMap map = f.getAnnotation(DBFieldMap.class);
+			if (map != null) {
+				if (map.dbIgnore()) {
+					continue;
+				}
+			}
+
+			if (f.getType().equals(List.class)) {
 				if (!dumpSubObjects)
 					continue;
-				
+
 				List<Object> subVals = null;
 				try {
-					subVals = (List<Object>)f.get(sourceObject);
+					subVals = (List<Object>) f.get(sourceObject);
 				} catch (IllegalArgumentException e) {
 					// stub - we have marked the field accessible above
 				} catch (IllegalAccessException e) {
 					// stub - we have marked the field accessible above
 				}
-				if (subVals != null)
-				{
+				if (subVals != null) {
 					BasicDBList list = new BasicDBList();
-					for (Object o : subVals)
-					{
-						if (o instanceof BaseData)
-						{
-							BaseData bd = (BaseData)o;
+					for (Object o : subVals) {
+						if (o instanceof BaseData) {
+							BaseData bd = (BaseData) o;
 							list.add(bd.toDBObject());
-						}
-						else if (o instanceof BasicDBObject)
-							list.add((DBObject)o);
+						} else if (o instanceof BasicDBObject)
+							list.add((DBObject) o);
 						else {
 							list.add(o);
 						}
 					}
 					object = list;
-				}	
+				}
 			} else {
 				try {
 					object = f.get(sourceObject);
@@ -102,51 +102,39 @@ abstract public class BaseData {
 					// stub - we have marked the field accessible above
 				}
 			}
-			
+
 			if (object == null)
 				continue;
-			
-			if (object instanceof ObjectId)
-			{
+
+			if (object instanceof ObjectId) {
 				obj.put(fieldName, object.toString());
-			}
-			else if (object instanceof Timestamp)
-			{
-				Timestamp ts = (Timestamp)object;
+			} else if (object instanceof Timestamp) {
+				Timestamp ts = (Timestamp) object;
 				if (convertDates)
 					obj.put(fieldName, df.format(ts));
 				else
 					obj.put(fieldName, ts);
-			}
-			else if (object instanceof BaseData) 
-			{
-				obj.put(fieldName, ((BaseData)object).toDBObject());
-			}
-			else if (object instanceof BasicDBList) 
-			{
+			} else if (object instanceof BaseData) {
+				obj.put(fieldName, ((BaseData) object).toDBObject());
+			} else if (object instanceof BasicDBList) {
 				obj.put(fieldName, object);
-			}
-			else if (object instanceof Date)
-			{
-				Date ts = (Date)object;
+			} else if (object instanceof Date) {
+				Date ts = (Date) object;
 				if (convertDates)
 					obj.put(fieldName, df.format(ts));
 				else
 					obj.put(fieldName, ts);
-			}
-			else if (object != null && object.getClass().isEnum())
-			{
+			} else if (object != null && object.getClass().isEnum()) {
 				Method m = null;
 				try {
 					m = object.getClass().getDeclaredMethod("getMongoValue");
 				} catch (SecurityException e) {
 				} catch (NoSuchMethodException e) {
 				}
-				
-				if (m == null)	
-					obj.put(fieldName, object.toString() );
-				else
-				{
+
+				if (m == null) {
+					obj.put(fieldName, object.toString());
+				} else {
 					m.setAccessible(true);
 					try {
 						obj.put(fieldName, m.invoke(object));
@@ -159,9 +147,7 @@ abstract public class BaseData {
 						// stub - we have marked the method accessible above
 					}
 				}
-			}
-			else
-			{
+			} else {
 				obj.put(fieldName, object);
 			}
 		}

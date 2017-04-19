@@ -1,22 +1,17 @@
 package com.untzuntz.coredata;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.SQLXML;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import org.apache.log4j.Logger;
-
 import com.untzuntz.coredata.anno.DBFieldMap;
 import com.untzuntz.coredata.anno.DBTableMap;
 import com.untzuntz.coredata.exceptions.UnknownPrimaryKeyException;
+import org.apache.log4j.Logger;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Processes a SQL ResultSet and converts it to Java Beans.
@@ -164,7 +159,7 @@ public class ORMBeanProcessor {
 		{
 			fieldsToLoad = new ArrayList<Field>();
 
-			List<Field> fields = DataMgr.getFields(null, type);
+			List<Field> fields = ReflectionUtil.getFields(type);
 			for (Field f : fields)
 			{
 				f.setAccessible(true);
@@ -193,7 +188,7 @@ public class ORMBeanProcessor {
 		{
 			fieldToSet = new ArrayList<FieldMap>();
 			
-			List<Field> fields = DataMgr.getFields(null, type);
+			List<Field> fields = ReflectionUtil.getFields(type);
 			for (Field f : fields)
 			{
 				f.setAccessible(true);

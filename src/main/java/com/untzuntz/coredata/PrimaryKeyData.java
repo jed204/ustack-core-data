@@ -1,11 +1,11 @@
 package com.untzuntz.coredata;
 
-import java.lang.reflect.Field;
-import java.util.List;
-
 import com.untzuntz.coredata.anno.DBPrimaryKey;
 import com.untzuntz.coredata.anno.DBTableMap;
 import com.untzuntz.coredata.exceptions.UnknownPrimaryKeyException;
+
+import java.lang.reflect.Field;
+import java.util.List;
 
 /**
  * Primary Key helper
@@ -169,7 +169,7 @@ public class PrimaryKeyData {
 	
 	public static PrimaryKeyData getInstance(DBTableMap tbl, Object obj) throws UnknownPrimaryKeyException
 	{
-		List<Field> fields = DataMgr.getFields(tbl, obj);
+		List<Field> fields = ReflectionUtil.getFields(tbl, obj);
 		
 		/*
 		 * Get the primary key (if it's set)
