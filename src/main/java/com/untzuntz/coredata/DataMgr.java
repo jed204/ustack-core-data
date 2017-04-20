@@ -508,7 +508,7 @@ public class DataMgr {
     	
         Method setter = null;
 		try {
-			setter = target.getClass().getDeclaredMethod(setterName, paramType);
+			setter = ReflectionUtil.getMethod(setterName, paramType, target.getClass());
 		} catch (NoSuchMethodException nse) {
 			if (target instanceof MongoBaseData)
 			{
