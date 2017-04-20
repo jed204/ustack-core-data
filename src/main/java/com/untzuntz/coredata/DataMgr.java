@@ -6,13 +6,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.mail.internet.InternetAddress;
 import javax.sql.DataSource;
@@ -514,7 +508,7 @@ public class DataMgr {
     	
         Method setter = null;
 		try {
-			setter = target.getClass().getDeclaredMethod(setterName, paramType);
+			setter = ReflectionUtil.getMethod(setterName, paramType, target.getClass());
 		} catch (NoSuchMethodException nse) {
 			if (target instanceof MongoBaseData)
 			{
@@ -717,13 +711,11 @@ public class DataMgr {
 	
 	private static Field getFieldByName(Object obj, String fieldName) 
 	{
-		final Field[] fields = obj.getClass().getDeclaredFields();
+		final List<Field> fields = ReflectionUtil.getFields(obj.getClass());
 
-		for (int i = 0; i < fields.length; i++) 
-		{
-			final Field f = fields[i];
+		for (final Field f : fields) {
 			f.setAccessible(true);
-			
+
 			if (f.getName().equals(fieldName))
 				return f;
 		}
@@ -733,11 +725,9 @@ public class DataMgr {
 	private static Field getFieldByColumn(Object obj, String inColName) throws UnknownPrimaryKeyException
 	{
 		PrimaryKeyData pk = PrimaryKeyData.getInstance(null, obj);
-		final Field[] fields = obj.getClass().getDeclaredFields();
+		final List<Field> fields = ReflectionUtil.getFields(obj.getClass());
 
-		for (int i = 0; i < fields.length; i++) 
-		{
-			final Field f = fields[i];
+		for (final Field f : fields) {
 			f.setAccessible(true);
 
 			String colName = null;
@@ -746,10 +736,10 @@ public class DataMgr {
 				colName = f.getName();
 			else if (!map.dbLoadListFromQuery() && !map.dbIgnore())
 				colName = map.dbColumn();
-			
+
 			if (pk != null && f.equals(pk.getField())) // don't set the primary key value
 				colName = pk.getColumnName();
-			
+
 			if (inColName.equals(colName))
 				return f;
 		}
@@ -784,7 +774,7 @@ public class DataMgr {
 	public static void saveOrUpdateMongo(DBTableMap tbl, Object obj) throws UnknownPrimaryKeyException, IllegalArgumentException, IllegalAccessException
 	{
 		PrimaryKeyData pk = PrimaryKeyData.getInstance(tbl, obj);
-		final Field[] fields = obj.getClass().getDeclaredFields();
+		final List<Field> fields = ReflectionUtil.getFields(obj.getClass());
 
 		DBObject toSave = new BasicDBObject();
 		
@@ -882,44 +872,7 @@ public class DataMgr {
 		} catch (Exception e) {}
 		
 	}
-	
-	/**
-	 * Returns all fields from the object (and super classes if configured to do so)
-	 * @param tbl
-	 * @param obj
-	 * @return
-	 */
-	public static List<Field> getFields(DBTableMap tbl, Object obj)
-	{
-		return getFields(tbl, obj.getClass());
-	}
-	
-	/**
-	 * Returns all fields from the object (and super classes if configured to do so)
-	 * @param tbl
-	 * @param obj
-	 * @return
-	 */
-	public static List<Field> getFields(DBTableMap tbl, Class cls)
-	{
-		List<Field> fields = new ArrayList<Field>(Arrays.asList(cls.getDeclaredFields()));
-		
-		if (tbl == null)
-			tbl = (DBTableMap)cls.getAnnotation(DBTableMap.class);
-		
-		if (tbl != null && tbl.includeParent())
-		{
-			Class superCls = cls.getSuperclass();
-			while (superCls != null)
-			{
-				fields.addAll(Arrays.asList(superCls.getDeclaredFields()));
-				superCls = superCls.getSuperclass();
-			}
-		}
 
-		return fields;
-	}
-	
 	/**
 	 * Saves or updates data in a SQL database
 	 * 
@@ -934,7 +887,7 @@ public class DataMgr {
 	{
 		List<Object> fieldVals = new ArrayList<Object>();
 		PrimaryKeyData pk = PrimaryKeyData.getInstance(tbl, obj);
-		List<Field> fields = getFields(tbl, obj);
+		List<Field> fields = ReflectionUtil.getFields(tbl, obj);
 
 		boolean sqlUpdate = pk != null && pk.hasValue();
 		if (sqlUpdate && obj instanceof MultiKey)
@@ -1077,7 +1030,7 @@ public class DataMgr {
 		}
 
 		StringBuffer buf = new StringBuffer();
-		List<Field> fields = getFields(tblMap, cls);
+		List<Field> fields = ReflectionUtil.getFields(tblMap, cls);
 		
 		boolean added = false;
 		for (Field f : fields) {
