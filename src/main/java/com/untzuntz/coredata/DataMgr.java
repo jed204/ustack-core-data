@@ -226,6 +226,11 @@ public class DataMgr {
 	 */
 	public static <T> T getFromMongo(Class<T> inClass, DBObject search) throws FailedRequestException, UnknownPrimaryKeyException
 	{
+		return getFromMongo(inClass, search, null);
+	}
+	
+	public static <T> T getFromMongo(Class<T> inClass, DBObject search, DBObject sort) throws FailedRequestException, UnknownPrimaryKeyException
+	{
 		DBTableMap tbl = inClass.getAnnotation(DBTableMap.class);
 		if (tbl == null)
 			throw new FailedRequestException("Cannot persist or grab class from data source : " + inClass.getName());
@@ -233,7 +238,8 @@ public class DataMgr {
 		logger.info(String.format("Searching '%s.%s' for => %s", getDb(tbl), tbl.dbTable(), search));
 		
 		DBCollection col = MongoDB.getCollection(getDb(tbl), tbl.dbTable());
-		DBObject ret = col.findOne(search);
+		DBObject ret = col.findOne(search, null, sort);
+		col.findOne(search);
 		if (ret == null)
 			return null;
 		
