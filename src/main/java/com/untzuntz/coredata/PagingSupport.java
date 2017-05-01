@@ -18,6 +18,7 @@ public class PagingSupport {
 	private Long total;
 	private Integer page;
 	private Integer itemsPerPage;
+	private boolean isNoCount;
 	
 	public PagingSupport() {
 		this(null, null);
@@ -30,6 +31,14 @@ public class PagingSupport {
 		
 		this.page = page;
 		this.itemsPerPage = itemsPerPage;
+	}
+	
+	public boolean isNoCount() {
+		return isNoCount;
+	}
+	
+	public void setNoCount(boolean b) {
+		isNoCount = b;
 	}
 	
 	public Long getTotal() {
@@ -66,17 +75,18 @@ public class PagingSupport {
 	public DBObject toDBObject() {
 		
 		DBObject ret = new BasicDBObject();
-		if (total == null)
-			return ret;
 		
 		DBObject countInfo = new BasicDBObject();
-		Integer totalPages = getTotalPages();
-		countInfo.put("items", total);
 		
 		if (page != null)
 			countInfo.put("page", page);
-		if (totalPages != null)
-			countInfo.put("pages", totalPages);
+
+		if (total != null) {
+			Integer totalPages = getTotalPages();
+			countInfo.put("items", total);
+			if (totalPages != null)
+				countInfo.put("pages", totalPages);
+		}
 		
 		ret.put("paging", countInfo);
 		

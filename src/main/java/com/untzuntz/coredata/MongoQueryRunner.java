@@ -108,7 +108,7 @@ public class MongoQueryRunner {
 			orderByObj.put(orderBy.getFieldName(), orderBy.getDirection().getOrderInt());
 		}
 
-		logger.info(String.format("%s | Search [%s] | Sort [%s] | Skip %d | Limit %d", clazz.getSimpleName(), searchObj, orderByObj, skip, limit));
+		long start = System.currentTimeMillis();
 		
 		// run the actual query
 		DBCollection col = MongoDB.getCollection(DataMgr.getDb(tbl), tbl.dbTable());
@@ -119,9 +119,16 @@ public class MongoQueryRunner {
 			cur.limit(limit);
 
 		// setup result paging
-		if (paging != null)
+		long pagingStart = System.currentTimeMillis();
+		boolean nocount = false;
+		if (paging != null && !paging.isNoCount()) {
 			paging.setTotal(new Long(cur.count()));
+		} else {
+			nocount = true;
+		}
+		long pagingEnd = System.currentTimeMillis();
 		
+		long iterateStart = System.currentTimeMillis();
 		if (exportFormat != null)
 			exportFormat.output(cur);
 		else
@@ -129,6 +136,11 @@ public class MongoQueryRunner {
 			while (cur.hasNext())
 				ret.add(DataMgr.getObjectFromDBObject(clazz, cur.next()));
 		}
+		long iterateEnd = System.currentTimeMillis();
+		
+		logger.info(String.format("%s | Search [%s] | Sort [%s] | Skip %d | Limit %d => %d / %d / %d (%s)", 
+				clazz.getSimpleName(), searchObj, orderByObj, skip, limit,
+				(pagingEnd - pagingStart), (iterateEnd - iterateStart), (System.currentTimeMillis() - start), nocount));
 
 		return ret;
 	}
