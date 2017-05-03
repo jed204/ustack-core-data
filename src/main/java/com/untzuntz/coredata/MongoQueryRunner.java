@@ -1,11 +1,5 @@
 package com.untzuntz.coredata;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang.UnhandledException;
-import org.apache.log4j.Logger;
-
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
@@ -15,6 +9,11 @@ import com.untzuntz.coredata.exceptions.FailedRequestException;
 import com.untzuntz.coredata.exceptions.FieldSetException;
 import com.untzuntz.coredata.exceptions.UnknownPrimaryKeyException;
 import com.untzuntz.ustack.data.MongoDB;
+import org.apache.commons.lang.UnhandledException;
+import org.apache.log4j.Logger;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MongoQueryRunner {
 
@@ -138,7 +137,7 @@ public class MongoQueryRunner {
 		}
 		long iterateEnd = System.currentTimeMillis();
 		
-		logger.info(String.format("%s | Search [%s] | Sort [%s] | Skip %d | Limit %d => %d / %d / %d (%s)", 
+		logger.info(String.format("%s | Search [%s] | Sort [%s] | Skip %d | Limit %d => PagingTime %d / IterationTime %d / TotalTime %d CountEnabled: (%s)",
 				clazz.getSimpleName(), searchObj, orderByObj, skip, limit,
 				(pagingEnd - pagingStart), (iterateEnd - iterateStart), (System.currentTimeMillis() - start), nocount));
 
