@@ -179,7 +179,7 @@ public class DataMgr {
 		DBTableMap tbl = clazz.getAnnotation(DBTableMap.class);
 
 		DBCollection col = MongoDB.getCollection(getDb(tbl), tbl.dbTable());
-		col.ensureIndex(index, indexName);
+		col.createIndex(index, indexName);
 	}
 
 	/**
