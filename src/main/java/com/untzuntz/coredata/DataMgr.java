@@ -239,7 +239,6 @@ public class DataMgr {
 		
 		DBCollection col = MongoDB.getCollection(getDb(tbl), tbl.dbTable());
 		DBObject ret = col.findOne(search, null, sort);
-		col.findOne(search);
 		if (ret == null)
 			return null;
 		
