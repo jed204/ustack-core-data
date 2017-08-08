@@ -34,7 +34,7 @@ import org.apache.log4j.Logger;
 public class DateRange {
 
 	static 		Logger           	logger                  = Logger.getLogger(DateRange.class);	
-	public static final DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+	public static final DateFormat df = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 	static 
 	{
 		df.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -187,7 +187,7 @@ public class DateRange {
 	 */
 	public static String fixDate(String date, boolean lowMode) throws ParseException
 	{
-		if (date.length() < 14)
+		if (date.length() < 17)
 		{
 			int dateLen = date.length();
 			
@@ -204,8 +204,9 @@ public class DateRange {
 				if (fix.length() == 6)
 					fix.append("01");
 
-				while (fix.length() < 14)
+				while (fix.length() < 17) {
 					fix.append("0");
+				}
 			}
 			else
 			{
@@ -228,6 +229,8 @@ public class DateRange {
 					fix.append("59");
 				if (fix.length() == 12)
 					fix.append("59");
+				if (fix.length() == 14)
+					fix.append("999");
 			}
 			
 			date = fix.toString();
