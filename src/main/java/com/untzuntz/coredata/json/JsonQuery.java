@@ -221,12 +221,12 @@ public class JsonQuery {
 						for (Object v : values) {
 							if ("$doesNotContain".equals(key))
 							{
-								if (v == null || !v.toString().contains(strVal))
+								if (v == null || !v.toString().toLowerCase().contains(strVal.toLowerCase()))
 									checkPassed = true;
 							}
 							else
 							{
-								if (v != null && v.toString().contains(strVal))
+								if (v != null && v.toString().toLowerCase().contains(strVal.toLowerCase()))
 									checkPassed = true;
 							}
 						}
@@ -240,12 +240,12 @@ public class JsonQuery {
 						
 						if ("$doesNotContain".equals(key))
 						{
-							if (checkVal == null || !checkVal.toString().contains(strVal))
+							if (checkVal == null || !checkVal.toString().toLowerCase().contains(strVal.toLowerCase()))
 								checkPassed = true;
 						}
 						else
 						{
-							if (checkVal != null && checkVal.toString().contains(strVal))
+							if (checkVal != null && checkVal.toString().toLowerCase().contains(strVal.toLowerCase()))
 								checkPassed = true;
 						}
 					}
@@ -268,27 +268,15 @@ public class JsonQuery {
 							boolean thisRun = false;
 							double filterInt = filterValue.doubleValue();
 							double objectInt = objectValue.doubleValue();
-							if ("$lte".equals(key) && objectInt <= filterInt) {
+							if (("$lte".equals(key) && objectInt <= filterInt) ||
+									("$lt".equals(key) && objectInt < filterInt) ||
+									("$gte".equals(key) && objectInt >= filterInt) ||
+									("$gt".equals(key) && objectInt > filterInt)) {
 								hasValue = true;
 								thisRun = true;
 								reasonMap.put(key, ldf.format(filterInt));
 							}
-							else if ("$lt".equals(key) && objectInt < filterInt) {
-								hasValue = true;
-								thisRun = true;
-								reasonMap.put(key, ldf.format(filterInt));
-							}
-							else if ("$gte".equals(key) && objectInt >= filterInt) {
-								hasValue = true;
-								thisRun = true;
-								reasonMap.put(key, ldf.format(filterInt));
-							}
-							else if ("$gt".equals(key) && objectInt > filterInt) {
-								hasValue = true;
-								thisRun = true;
-								reasonMap.put(key, ldf.format(filterInt));
-							}
-							
+
 							//logger.info(key + " => " + filterInt + " vs. " + objectInt + " [" + thisRun + "]");
 						}
 						
@@ -308,22 +296,10 @@ public class JsonQuery {
 							boolean hasValue = false;
 							double filterInt = filterValue.doubleValue();
 							double objectInt = checkVal.doubleValue();
-							if ("$lte".equals(key) && objectInt <= filterInt)
-							{
-								hasValue = true;
-								reasonMap.put(key, ldf.format(filterInt));
-							}
-							else if ("$lt".equals(key) && objectInt < filterInt)
-							{
-								hasValue = true;
-								reasonMap.put(key, ldf.format(filterInt));
-							}
-							else if ("$gte".equals(key) && objectInt >= filterInt)
-							{
-								hasValue = true;
-								reasonMap.put(key, ldf.format(filterInt));
-							}
-							else if ("$gt".equals(key) && objectInt > filterInt)
+							if (("$lte".equals(key) && objectInt <= filterInt) ||
+									("$lt".equals(key) && objectInt < filterInt) ||
+									("$gte".equals(key) && objectInt >= filterInt) ||
+									("$gt".equals(key) && objectInt > filterInt))
 							{
 								hasValue = true;
 								reasonMap.put(key, ldf.format(filterInt));

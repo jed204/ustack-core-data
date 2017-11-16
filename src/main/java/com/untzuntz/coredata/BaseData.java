@@ -29,10 +29,10 @@ import com.untzuntz.coredata.anno.DBFieldMap;
  */
 abstract public class BaseData {
 
-	@DBFieldMap ( dbIgnore = true )
-	public static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-	static {
+	public static DateFormat getDateFormat() {
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 		df.setTimeZone(TimeZone.getTimeZone("UTC"));
+		return df;
 	}
 	
 	@DBFieldMap ( dbIgnore = true )
@@ -55,6 +55,9 @@ abstract public class BaseData {
 
 		final List<Field> fields = ReflectionUtil.getFields(sourceObject.getClass());
 		for (final Field f : fields) {
+			if (f.isSynthetic()) {
+				continue;
+			}
 			String fieldName = f.getName();
 			f.setAccessible(true);
 
@@ -111,7 +114,7 @@ abstract public class BaseData {
 			} else if (object instanceof Timestamp) {
 				Timestamp ts = (Timestamp) object;
 				if (convertDates)
-					obj.put(fieldName, df.format(ts));
+					obj.put(fieldName, getDateFormat().format(ts));
 				else
 					obj.put(fieldName, ts);
 			} else if (object instanceof BaseData) {
@@ -121,7 +124,7 @@ abstract public class BaseData {
 			} else if (object instanceof Date) {
 				Date ts = (Date) object;
 				if (convertDates)
-					obj.put(fieldName, df.format(ts));
+					obj.put(fieldName, getDateFormat().format(ts));
 				else
 					obj.put(fieldName, ts);
 			} else if (object != null && object.getClass().isEnum()) {
@@ -139,8 +142,7 @@ abstract public class BaseData {
 					try {
 						obj.put(fieldName, m.invoke(object));
 					} catch (InvocationTargetException e) {
-						//System.err.println("IV E");
-						e.printStackTrace();
+						// stub - we have marked the method accessible above
 					} catch (IllegalArgumentException e) {
 						// stub - we have marked the method accessible above
 					} catch (IllegalAccessException e) {
@@ -163,7 +165,7 @@ abstract public class BaseData {
 				String key = keys.next();
 				//System.err.println(key + " => " + extras.get(key));
 				if (convertDates && (extras.get(key) instanceof Date || extras.get(key) instanceof Timestamp))
-					obj.put(key, df.format(extras.get(key)));
+					obj.put(key, getDateFormat().format(extras.get(key)));
 				else
 					obj.put(key, extras.get(key));
 			}

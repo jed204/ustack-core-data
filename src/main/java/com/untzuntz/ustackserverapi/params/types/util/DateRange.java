@@ -33,12 +33,13 @@ import org.apache.log4j.Logger;
  */
 public class DateRange {
 
-	static 		Logger           	logger                  = Logger.getLogger(DateRange.class);	
-	public static final DateFormat df = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-	static 
-	{
+	static 		Logger           	logger                  = Logger.getLogger(DateRange.class);
+
+	public static DateFormat getDateFormat() {
+		DateFormat df = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 		df.setTimeZone(TimeZone.getTimeZone("UTC"));
 		df.setLenient(false);
+		return df;
 	}
 	
 	public DateRange(String range) throws ParseException {
@@ -95,6 +96,25 @@ public class DateRange {
 			
 			start = now.getTime();
 		}
+		else if (data.endsWith(" minutes"))
+		{
+			Calendar now = Calendar.getInstance();
+			now.add(Calendar.MINUTE, Integer.valueOf( data.substring(0, data.length() - 8) ));
+			now.set(Calendar.SECOND, 0);
+			now.set(Calendar.MILLISECOND, 0);
+
+			start = now.getTime();
+		}
+		else if (data.endsWith(" hours"))
+		{
+			Calendar now = Calendar.getInstance();
+			now.add(Calendar.HOUR_OF_DAY, Integer.valueOf( data.substring(0, data.length() - 6) ));
+			now.set(Calendar.MINUTE, 0);
+			now.set(Calendar.SECOND, 0);
+			now.set(Calendar.MILLISECOND, 0);
+
+			start = now.getTime();
+		}
 		else if (data.endsWith(" days"))
 		{
 			Calendar now = Calendar.getInstance();
@@ -103,7 +123,7 @@ public class DateRange {
 			now.set(Calendar.MINUTE, 0);
 			now.set(Calendar.SECOND, 0);
 			now.set(Calendar.MILLISECOND, 0);
-			
+
 			start = now.getTime();
 		}
 		else if (data.endsWith(" weeks"))
@@ -244,11 +264,11 @@ public class DateRange {
 		StringBuffer ret = new StringBuffer();
 		
 		if (start != null && end != null)
-			ret.append(df.format(start)).append("->").append(df.format(end));
+			ret.append(getDateFormat().format(start)).append("->").append(getDateFormat().format(end));
 		else if (start != null)
-			ret.append(">").append(df.format(start));
+			ret.append(">").append(getDateFormat().format(start));
 		else if (end != null)
-			ret.append("<").append(df.format(end));
+			ret.append("<").append(getDateFormat().format(end));
 		
 		return ret.toString();
 		
@@ -273,12 +293,12 @@ public class DateRange {
 		
 		date = fixDate(date, lowMode);
 		
-		return df.parse(date);
+		return getDateFormat().parse(date);
 	}
 
 	
-	public Date start;
-	public Date end;
+	private Date start;
+	private Date end;
 	
 	public Date getStart() {
 		return start;

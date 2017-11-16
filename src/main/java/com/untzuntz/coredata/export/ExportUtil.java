@@ -5,9 +5,21 @@ import java.util.List;
 
 public class ExportUtil {
 
-	public static final byte[] QUOTE = "\"".getBytes();
-	public static final byte[] COMMA = ",".getBytes();
-	public static final byte[] NEWLINE = "\n".getBytes();
+	private static final byte[] QUOTE = "\"".getBytes();
+	private static final byte[] COMMA = ",".getBytes();
+	private static final byte[] NEWLINE = "\n".getBytes();
+
+	public static byte[] getQUOTE() {
+		return QUOTE;
+	}
+
+	public static byte[] getCOMMA() {
+		return COMMA;
+	}
+
+	public static byte[] getNEWLINE() {
+		return NEWLINE;
+	}
 
 	/**
 	 * Closes a stream, handling all exceptions

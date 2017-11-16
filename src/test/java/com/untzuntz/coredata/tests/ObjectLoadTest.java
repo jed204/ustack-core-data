@@ -332,7 +332,10 @@ public class ObjectLoadTest {
 
 		@Override
 		public int findColumn(String columnLabel) throws SQLException {
-			return columnNames.get(columnLabel);
+			if (columnNames.get(columnLabel) != null) {
+				return columnNames.get(columnLabel).intValue();
+			}
+			return -1;
 		}
 
 		@Override

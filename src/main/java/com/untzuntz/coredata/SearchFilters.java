@@ -306,10 +306,9 @@ public class SearchFilters {
 		NotExists;
 		
 		public boolean isNoValue() {
-			if (this.equals(Exists))
+			if (this.equals(Exists) || this.equals(NotExists)) {
 				return true;
-			else if (this.equals(NotExists))
-				return true;
+			}
 			
 			return false;
 		}
@@ -323,11 +322,10 @@ public class SearchFilters {
 		
 		public boolean isLike()
 		{
-			if (this.equals(Like))
+			if (this.equals(Like) || this.equals(NotLike)) {
 				return true;
-			else if (this.equals(NotLike))
-				return true;
-			
+			}
+
 			return false;
 		}
 		

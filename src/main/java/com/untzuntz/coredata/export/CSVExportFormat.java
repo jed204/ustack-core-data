@@ -24,7 +24,7 @@ public class CSVExportFormat implements ExportFormat,OutputCallback {
 	/**
 	 * Exports the data to a CSV File
 	 * 
-	 * @param fileTarget
+	 * @param outputFile
 	 */
 	public CSVExportFormat(UFile outputFile)
 	{
@@ -99,17 +99,17 @@ public class CSVExportFormat implements ExportFormat,OutputCallback {
 
 	@Override
 	public void nextField() throws Exception {
-		out.write(ExportUtil.COMMA);
+		out.write(ExportUtil.getCOMMA());
 	}
 
 	@Override
 	public void writeField(Object fieldValue, ExportFieldFormat format) throws Exception {
-		out.write(ExportUtil.QUOTE);
+		out.write(ExportUtil.getQUOTE());
 		if (fieldValue instanceof Date)
 			out.write( getFormat(format.getFieldFormat()).format(((Date)fieldValue)).getBytes() );
 		else
 			out.write(fieldValue.toString().getBytes());
-		out.write(ExportUtil.QUOTE);
+		out.write(ExportUtil.getQUOTE());
 	}
 
 	/**
@@ -137,7 +137,7 @@ public class CSVExportFormat implements ExportFormat,OutputCallback {
 
 	@Override
 	public void nextLine() throws Exception {
-		out.write(ExportUtil.NEWLINE);
+		out.write(ExportUtil.getNEWLINE());
 	}
 	
 }

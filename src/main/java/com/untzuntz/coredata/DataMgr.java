@@ -54,12 +54,24 @@ public class DataMgr {
 	private static final String UPDATE = "UPDATE ";
 	private static final String DELETE_FROM = "DELETE FROM ";
 	private static final String VAL_SET = " = ?";
-	
-    public static final HashMap<Class,String> tblPrefixCache = new HashMap<Class,String>();
-    public static final HashMap<Class,String> pkFieldCache = new HashMap<Class,String>();
-    public static final HashMap<Class,List<FieldMap>> fieldToSetCache = new HashMap<Class,List<FieldMap>>();
-	
-	static 
+
+	private static final HashMap<Class,String> tblPrefixCache = new HashMap<Class,String>();
+	private static final HashMap<Class,String> pkFieldCache = new HashMap<Class,String>();
+	private static final HashMap<Class,List<FieldMap>> fieldToSetCache = new HashMap<Class,List<FieldMap>>();
+
+	public static HashMap<Class, String> getTblPrefixCache() {
+		return tblPrefixCache;
+	}
+
+	public static HashMap<Class, String> getPkFieldCache() {
+		return pkFieldCache;
+	}
+
+	public static HashMap<Class, List<FieldMap>> getFieldToSetCache() {
+		return fieldToSetCache;
+	}
+
+	static
 	{
 		dbToJavaMaps = new HashMap<Class<?>,String>();
 		objectGetMap = new HashMap<Class<?>,String>();
@@ -442,7 +454,7 @@ public class DataMgr {
     		Class cls = target.getClass();
     		//logger.debug(String.format("Getting '%s' from class '%s'", fieldName, target.getClass().getName()));
     		Field f = cls.getDeclaredField(fieldName);
-    		if (f == null)
+    		if (f == null || f.isSynthetic())
     			return;
 
     		List objectList = new ArrayList();
@@ -508,7 +520,7 @@ public class DataMgr {
     		paramType = f.getType();
     	}
     	
-    	if (paramType == null)
+    	if (paramType == null && value != null)
     		paramType = value.getClass();
     	
         Method setter = null;
@@ -785,6 +797,10 @@ public class DataMgr {
 		
 		for (Field f : fields)
 		{
+			if (f.isSynthetic()) {
+				continue;
+			}
+
 			f.setAccessible(true);
 
 			String colName = null;
@@ -1039,12 +1055,15 @@ public class DataMgr {
 		
 		boolean added = false;
 		for (Field f : fields) {
+			if (f.isSynthetic()) {
+				continue;
+			}
 			DBFieldMap map = f.getAnnotation(DBFieldMap.class);
 			if (map == null)
 			{
 				if (added)
 					buf.append(",");
-				
+
 				DBPrimaryKey pk = f.getAnnotation(DBPrimaryKey.class);
 				if (pk != null)
 					buf.append(qPrefix).append(pk.dbColumn()).append(" AS ").append(rPrefix).append(f.getName());
@@ -1056,7 +1075,7 @@ public class DataMgr {
 			{
 				if (added)
 					buf.append(",");
-				
+
 				buf.append(qPrefix).append(map.dbColumn()).append(" AS ").append(rPrefix).append(f.getName());
 				added = true;
 			}

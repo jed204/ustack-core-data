@@ -131,7 +131,7 @@ public class ORMBeanProcessor {
      */
     private String getTablePrefix(Class<?> type)
     {
-    	String rPrefix = DataMgr.tblPrefixCache.get(type);
+    	String rPrefix = DataMgr.getTblPrefixCache().get(type);
 		if (rPrefix == null)
 		{
 			DBTableMap tblMap = type.getAnnotation(DBTableMap.class);
@@ -141,7 +141,7 @@ public class ORMBeanProcessor {
 				rPrefix = "";
 			
 			if (!DisableCache)
-				DataMgr.tblPrefixCache.put(type, rPrefix);
+				DataMgr.getTblPrefixCache().put(type, rPrefix);
 		}
 		return rPrefix;
     }
@@ -183,7 +183,7 @@ public class ORMBeanProcessor {
      */
     private List<FieldMap> getFieldsToSet(Class<?> type, String rPrefix)
     {
-		List<FieldMap> fieldToSet = DataMgr.fieldToSetCache.get(type);
+		List<FieldMap> fieldToSet = DataMgr.getFieldToSetCache().get(type);
 		if (fieldToSet == null)
 		{
 			fieldToSet = new ArrayList<FieldMap>();
@@ -211,7 +211,7 @@ public class ORMBeanProcessor {
 			}
 
 			if (!DisableCache)
-				DataMgr.fieldToSetCache.put(type, fieldToSet);
+				DataMgr.getFieldToSetCache().put(type, fieldToSet);
 		}
 
 		return fieldToSet;
@@ -227,7 +227,7 @@ public class ORMBeanProcessor {
     private PkFieldInfo getPKSQLField(Class<?> type, String rPrefix, ResultSet rs)
     {
     	// Determine the SQL FieldName
-        String pkSQLField = DataMgr.pkFieldCache.get(type);
+        String pkSQLField = DataMgr.getPkFieldCache().get(type);
         if (pkSQLField == null)
         {
         	String pkField = PrimaryKeyData.getPKField(type);
@@ -236,7 +236,7 @@ public class ORMBeanProcessor {
 				pkSQLField = rPrefix + pkField;
 
 				if (!DisableCache)
-					DataMgr.pkFieldCache.put(type, pkSQLField);
+					DataMgr.getPkFieldCache().put(type, pkSQLField);
         	}
         }
         
@@ -301,6 +301,10 @@ public class ORMBeanProcessor {
 		try {
 			bean = (T)type.newInstance();
 		} catch (Exception e) {}
+
+		if (bean == null) {
+			throw new IllegalArgumentException("Cannot create object type: " + type.getName());
+		}
 
 		// The list of 'sub' fields to load for this type AND query
 		List<Field> fieldsToLoad = getFieldsToLoad(type, fieldToLoadCache);
@@ -440,33 +444,33 @@ public class ORMBeanProcessor {
     	
         // Do object check first, then primitives
         if (value == null || type.isInstance(value)) {
-            return true;
-
-        } else if (type.equals(Integer.TYPE) && Integer.class.isInstance(value)) {
-            return true;
-
-        } else if (type.equals(Long.TYPE) && Long.class.isInstance(value)) {
-            return true;
-
-        } else if (type.equals(Double.TYPE) && Double.class.isInstance(value)) {
-            return true;
-
-        } else if (type.equals(Float.TYPE) && Float.class.isInstance(value)) {
-            return true;
-
-        } else if (type.equals(Short.TYPE) && Short.class.isInstance(value)) {
-            return true;
-
-        } else if (type.equals(Byte.TYPE) && Byte.class.isInstance(value)) {
-            return true;
-
-        } else if (type.equals(Character.TYPE) && Character.class.isInstance(value)) {
-            return true;
-
-        } else if (type.equals(Boolean.TYPE) && Boolean.class.isInstance(value)) {
-            return true;
-
-        }
+			return true;
+		}
+//        } else if (type.equals(Integer.TYPE) && Integer.class.isInstance(value)) {
+//            return true;
+//
+//        } else if (type.equals(Long.TYPE) && Long.class.isInstance(value)) {
+//            return true;
+//
+//        } else if (type.equals(Double.TYPE) && Double.class.isInstance(value)) {
+//            return true;
+//
+//        } else if (type.equals(Float.TYPE) && Float.class.isInstance(value)) {
+//            return true;
+//
+//        } else if (type.equals(Short.TYPE) && Short.class.isInstance(value)) {
+//            return true;
+//
+//        } else if (type.equals(Byte.TYPE) && Byte.class.isInstance(value)) {
+//            return true;
+//
+//        } else if (type.equals(Character.TYPE) && Character.class.isInstance(value)) {
+//            return true;
+//
+//        } else if (type.equals(Boolean.TYPE) && Boolean.class.isInstance(value)) {
+//            return true;
+//
+//        }
         return false;
 
     }
@@ -538,11 +542,43 @@ public class ORMBeanProcessor {
      * @author jdanner
      */
     public class FieldMap {
-    	public Field f;
-    	public String sqlField;
-    	public String setter;
-    	public Class type;
-    }
+    	private Field f;
+		private String sqlField;
+		private String setter;
+		private Class type;
+
+		public Field getF() {
+			return f;
+		}
+
+		public void setF(Field f) {
+			this.f = f;
+		}
+
+		public String getSqlField() {
+			return sqlField;
+		}
+
+		public void setSqlField(String sqlField) {
+			this.sqlField = sqlField;
+		}
+
+		public String getSetter() {
+			return setter;
+		}
+
+		public void setSetter(String setter) {
+			this.setter = setter;
+		}
+
+		public Class getType() {
+			return type;
+		}
+
+		public void setType(Class type) {
+			this.type = type;
+		}
+	}
 
     /**
      * Return package
@@ -551,9 +587,25 @@ public class ORMBeanProcessor {
      */
     private class PkFieldInfo
     {
-    	public String pkSQLField;
-    	public String origPk;
-    }
+    	private String pkSQLField;
+		private String origPk;
+
+		public String getPkSQLField() {
+			return pkSQLField;
+		}
+
+		public void setPkSQLField(String pkSQLField) {
+			this.pkSQLField = pkSQLField;
+		}
+
+		public String getOrigPk() {
+			return origPk;
+		}
+
+		public void setOrigPk(String origPk) {
+			this.origPk = origPk;
+		}
+	}
 
 
 }
