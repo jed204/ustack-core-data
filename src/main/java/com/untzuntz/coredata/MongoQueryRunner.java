@@ -1,5 +1,6 @@
 package com.untzuntz.coredata;
 
+import com.Ostermiller.util.MD5;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
@@ -9,11 +10,14 @@ import com.untzuntz.coredata.exceptions.FailedRequestException;
 import com.untzuntz.coredata.exceptions.FieldSetException;
 import com.untzuntz.coredata.exceptions.UnknownPrimaryKeyException;
 import com.untzuntz.ustack.data.MongoDB;
+import com.untzuntz.ustack.data.UDataCache;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.UnhandledException;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class MongoQueryRunner {
 
@@ -26,10 +30,10 @@ public class MongoQueryRunner {
 
 	public static <T> List<T> runListQuery(Class<T> clazz, SearchFilters filters, OrderBy orderBy, PagingSupport paging, DBObject additionalSearch) throws FailedRequestException, UnknownPrimaryKeyException, UnhandledException
 	{
-		return runListQuery(clazz, filters, orderBy, paging, additionalSearch, null);
+		return runListQuery(clazz, filters, orderBy, paging, additionalSearch, null, null, null);
 	}
 	
-	public static <T> int count(Class<T> clazz, SearchFilters filters, DBObject additionalSearch) throws FailedRequestException
+	public static <T> int count(Class<T> clazz, SearchFilters filters, DBObject additionalSearch, Integer maxTimeSeconds) throws FailedRequestException
 	{
 		DBTableMap tbl = clazz.getAnnotation(DBTableMap.class);
 		if (tbl == null)
@@ -49,31 +53,106 @@ public class MongoQueryRunner {
 		String colName = tbl.dbTable();
 		DBCollection col = MongoDB.getCollection(db, colName);
 		DBCursor cur = col.find(searchObj);
+		if (maxTimeSeconds != null) {
+			cur.maxTime(maxTimeSeconds, TimeUnit.SECONDS);
+		}
 		int count = cur.count();
 		
 		logger.info(String.format("[%s.%s] => %s | Count: %d", db, colName, searchObj, count));
 		
 		return count;
 	}
+
+	public static class CachePlan {
+		private Integer resultCacheTime;
+		private Integer countCacheTime;
+		private String key;
+
+		private boolean countFromCache;
+		private boolean resultsFromCache;
+	
+		private DBObject summary = new BasicDBObject();
+		private String queryUid;
+
+		public CachePlan(String key, Integer resultCacheTime, Integer countCacheTime) {
+			this.key = key;
+			this.resultCacheTime = resultCacheTime;
+			this.countCacheTime = countCacheTime;
+		}
+
+		public boolean hasCountCache() {
+			return key != null && countCacheTime != null;
+		}
+
+		public boolean hasResultCache() {
+			return key != null && resultCacheTime != null;
+		}
+
+		public void setSearch(DBObject search) {
+			summary.put("search", search);
+		}
+
+		public void setSort(DBObject sort) {
+			summary.put("sort", sort);
+		}
+
+		public void setPaging(PagingSupport paging) {
+			summary.put("page", paging.getPage());
+			summary.put("limit", paging.getItemsPerPage());
+		}
+
+		private void calculateQueryUid() {
+			queryUid = String.format("mcq_%s_%s", key, DigestUtils.md5Hex(summary.toString()));
+		}
+
+		public void setCacheCount(Long value) {
+
+			if (value == null || !hasCountCache()) {
+				logger.info("Skipping Cache Count");
+				return;
+			}
+
+			logger.info(String.format("Setting Cache [%s] => %d", queryUid, value));
+			UDataCache.getInstance().set(queryUid, countCacheTime, value);
+		}
+
+		public Long getCacheCount() {
+
+			if (!hasCountCache()) {
+				return null;
+			}
+
+			calculateQueryUid();
+
+			return (Long)UDataCache.getInstance().get(queryUid);
+		}
+
+		public boolean isCountFromCache() {
+			return countFromCache;
+		}
+
+		public void setCountFromCache(boolean countFromCache) {
+			this.countFromCache = countFromCache;
+		}
+
+		public boolean isResultsFromCache() {
+			return resultsFromCache;
+		}
+
+		public void setResultsFromCache(boolean resultsFromCache) {
+			this.resultsFromCache = resultsFromCache;
+		}
+	}
 	
     /**
      * Executes a query against the MongoDB database for the request class and collection
      * 
-     * @param clazz
-     * @param filters
-     * @param orderBy
-     * @param paging
-     * @return
      * @throws FailedRequestException
      * @throws UnknownPrimaryKeyException
      * @throws UnhandledException 
      * @throws SecurityException
-     * @throws InstantiationException
-     * @throws IllegalAccessException
-     * @throws FieldSetException
-     * @throws NoSuchFieldException
      */
-	public static <T> List<T> runListQuery(Class<T> clazz, SearchFilters filters, OrderBy orderBy, PagingSupport paging, DBObject additionalSearch, ExportFormat exportFormat) throws FailedRequestException, UnknownPrimaryKeyException, UnhandledException
+	public static <T> List<T> runListQuery(Class<T> clazz, SearchFilters filters, OrderBy orderBy, PagingSupport paging, DBObject additionalSearch, ExportFormat exportFormat, Integer maxTimeSeconds, CachePlan cache) throws FailedRequestException, UnknownPrimaryKeyException, UnhandledException
 	{
 		DBTableMap tbl = clazz.getAnnotation(DBTableMap.class);
 		if (tbl == null)
@@ -88,9 +167,10 @@ public class MongoQueryRunner {
 		else
 			searchObj = new BasicDBObject();
 		
-		if (additionalSearch != null)
+		if (additionalSearch != null) {
 			searchObj.putAll(additionalSearch);
-		
+		}
+
 		// paging and limits
 		int skip = 0;
 		int limit = -1;
@@ -112,6 +192,11 @@ public class MongoQueryRunner {
 		// run the actual query
 		DBCollection col = MongoDB.getCollection(DataMgr.getDb(tbl), tbl.dbTable());
 		DBCursor cur = col.find(searchObj);
+
+		if (maxTimeSeconds != null) {
+			cur.maxTime(maxTimeSeconds, TimeUnit.SECONDS);
+		}
+
 		cur.sort(orderByObj);
 		cur.skip(skip);
 		if (limit != -1)
@@ -121,7 +206,20 @@ public class MongoQueryRunner {
 		long pagingStart = System.currentTimeMillis();
 		boolean nocount = false;
 		if (paging != null && !paging.isNoCount()) {
-			paging.setTotal(new Long(cur.count()));
+			Long total = null;
+			if (cache != null) {
+				cache.setSort(orderByObj);
+				cache.setPaging(paging);
+				cache.setSearch(searchObj);
+				total = cache.getCacheCount();
+			}
+			if (total == null) {
+				total = new Long(cur.count());
+				if (cache != null) {
+					cache.setCacheCount(total);
+				}
+			}
+			paging.setTotal(total);
 		} else {
 			nocount = true;
 		}
@@ -132,12 +230,13 @@ public class MongoQueryRunner {
 			exportFormat.output(cur);
 		else
 		{
-			while (cur.hasNext())
+			while (cur.hasNext()) {
 				ret.add(DataMgr.getObjectFromDBObject(clazz, cur.next()));
+			}
 		}
 		long iterateEnd = System.currentTimeMillis();
 		
-		logger.info(String.format("%s | Search [%s] | Sort [%s] | Skip %d | Limit %d => PagingTime %d / IterationTime %d / TotalTime %d CountEnabled: (%s)",
+		logger.info(String.format("%s | Search [%s] | Sort [%s] | Skip %d | Limit %d => PagingTime %d / IterationTime %d / TotalTime %d CountEnabled: (nocount: %s)",
 				clazz.getSimpleName(), searchObj, orderByObj, skip, limit,
 				(pagingEnd - pagingStart), (iterateEnd - iterateStart), (System.currentTimeMillis() - start), nocount));
 
@@ -147,16 +246,9 @@ public class MongoQueryRunner {
 	/**
 	 * Searches for a single object based on the provided search filters
 	 * 
-	 * @param clazz
-	 * @param filters
-	 * @return
 	 * @throws FailedRequestException
 	 * @throws UnknownPrimaryKeyException
 	 * @throws SecurityException
-	 * @throws InstantiationException
-	 * @throws IllegalAccessException
-	 * @throws FieldSetException
-	 * @throws NoSuchFieldException
 	 */
 	public static <T> T runQuery(Class<T> clazz, SearchFilters filters) throws FailedRequestException, UnknownPrimaryKeyException
 	{

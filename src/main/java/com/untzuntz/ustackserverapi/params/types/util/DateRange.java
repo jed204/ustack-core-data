@@ -200,10 +200,6 @@ public class DateRange {
 	
 	/**
 	 * Appends proper fields to the provided date string
-	 * 
-	 * @param date
-	 * @param lowMode
-	 * @return
 	 */
 	public static String fixDate(String date, boolean lowMode) throws ParseException
 	{
@@ -280,9 +276,6 @@ public class DateRange {
 	 * if lowMode = true then we fill in fields to low values (beginning of the month/day/hour/min/sec)
 	 * if lowMode = false then we fill in fields to high values (end of the month/day/hour/min/sec)
 	 * 
-	 * @param date
-	 * @param lowMode
-	 * @return
 	 */
 	public Date getDate(String date, boolean lowMode) throws ParseException
 	{

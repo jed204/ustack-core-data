@@ -12,9 +12,9 @@ import com.untzuntz.coredata.DataMgr;
  * 
  * Method definitions:
  * 
- * addItemMethodName -> method(String actor, Object item)
- * removeItemMethodName -> method(String actor, Integer itemIndex)
- * replaceItemMethodName -> method(String actor, Integer itemIdex, Object item)
+ * addItemMethodName - method(String actor, Object item)
+ * removeItemMethodName - method(String actor, Integer itemIndex)
+ * replaceItemMethodName - method(String actor, Integer itemIdex, Object item)
  * 
  * Note: Object can be the generic class from the List
  * 

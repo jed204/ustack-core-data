@@ -19,11 +19,16 @@ public class PagingSupport {
 	private Integer page;
 	private Integer itemsPerPage;
 	private boolean isNoCount;
-	
+
 	public PagingSupport() {
 		this(null, null);
 	}
-	
+
+	public PagingSupport(Integer page, Integer itemsPerPage, boolean noCount) {
+		this(page, itemsPerPage);
+		this.setNoCount(noCount);
+	}
+
 	public PagingSupport(Integer page, Integer itemsPerPage)
 	{
 		if (this.page != null && this.page < 1)

@@ -48,7 +48,6 @@ public class ExcelExportFormat implements ExportFormat,OutputCallback {
 	/**
 	 * Exports the data to a CSV File
 	 * 
-	 * @param fileTarget
 	 */
 	public ExcelExportFormat(UFile outputFile)
 	{
@@ -178,9 +177,6 @@ public class ExcelExportFormat implements ExportFormat,OutputCallback {
 	/**
 	 * Writes the data to the row
 	 * 
-	 * @param fieldValue
-	 * @param format
-	 * @param overrideStyle
 	 */
 	private void writeField(Object fieldValue, ExportFieldFormat format, CellStyle overrideStyle)
 	{
@@ -219,8 +215,6 @@ public class ExcelExportFormat implements ExportFormat,OutputCallback {
 	/**
 	 * Cache the data formats
 	 * 
-	 * @param format
-	 * @return
 	 */
 	private CellStyle getStyleByFormat(String format)
 	{
@@ -238,8 +232,6 @@ public class ExcelExportFormat implements ExportFormat,OutputCallback {
 	/**
 	 * Cache the color styles
 	 * 
-	 * @param format
-	 * @return
 	 */
 	private CellStyle getStyleByColor(String foregroundColor, String backgroundColor)
 	{

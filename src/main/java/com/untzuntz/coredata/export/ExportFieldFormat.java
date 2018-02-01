@@ -8,8 +8,6 @@ public interface ExportFieldFormat {
 
 	/**
 	 * The data format of this field
-	 * 
-	 * @return
 	 */
 	public String getFieldFormat();
 	
@@ -22,10 +20,6 @@ public interface ExportFieldFormat {
 	public int getLineCount();
 	/**
 	 * Returns the string value of the data.
-	 * 
-	 * @param data
-	 * @param outputIndex
-	 * @return
 	 */
 	public Object getFieldValue(Object data, int outputLine);
 	

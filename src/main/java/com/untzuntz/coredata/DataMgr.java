@@ -100,9 +100,6 @@ public class DataMgr {
 	
 	/**
 	 * Returns which database to connect to
-	 * 
-	 * @param map
-	 * @return
 	 */
 	public static String getDb(DBTableMap map)
 	{
@@ -114,7 +111,6 @@ public class DataMgr {
 	/**
 	 * Deletes an object from the database
 	 * 
-	 * @param obj
 	 * @throws SQLException
 	 * @throws UnknownPrimaryKeyException
 	 */
@@ -180,8 +176,6 @@ public class DataMgr {
 	
 	/**
 	 * Creates an Index in MongoDB
-	 * @param clazz
-	 * @param index
 	 */
 	public static void ensureIndex(String indexName, Class<?> clazz, DBObject index)
 	{
@@ -197,10 +191,6 @@ public class DataMgr {
 	/**
 	 * Returns an object from the database provided a primary key value and a sql string
 	 * 
-	 * @param inClass
-	 * @param pkValue
-	 * @param sqlStr
-	 * @return
 	 * @throws SQLException
 	 * @throws UnknownPrimaryKeyException
 	 */
@@ -213,9 +203,6 @@ public class DataMgr {
 	/**
 	 * Returns an object from the database provided a primary key value
 	 * 
-	 * @param inClass
-	 * @param pkValue
-	 * @return
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T get(Class<T> inClass, Object pkValue) throws SQLException, UnknownPrimaryKeyException
@@ -225,9 +212,6 @@ public class DataMgr {
 	
 	/**
 	 * Returns an object from the mongodb based on the provided search
-	 * @param inClass
-	 * @param search
-	 * @return
 	 * @throws InstantiationException
 	 * @throws IllegalAccessException
 	 * @throws UnknownPrimaryKeyException
@@ -262,12 +246,7 @@ public class DataMgr {
 	/**
 	 * Returns an object from the mongodb based on the provided search
 	 * 
-	 * @param inClass
-	 * @param orderBy
-	 * @param paging
-	 * @param filters
-	 * @return
-	 * @throws FailedRequestException 
+	 * @throws FailedRequestException
 	 * @throws UnknownPrimaryKeyException 
 	 */
 	public static <T> List<T> getListFromMongo(Class<T> inClass, DBObject extraSearch, OrderBy orderBy, PagingSupport paging, SearchFilters filters) throws UnknownPrimaryKeyException, FailedRequestException
@@ -297,9 +276,6 @@ public class DataMgr {
 	
 	/**
 	 * Returns an object from the mongodb based on the provided search
-	 * @param inClass
-	 * @param search
-	 * @return
 	 * @throws UnknownPrimaryKeyException
 	 * @throws FailedRequestException 
 	 */
@@ -336,8 +312,6 @@ public class DataMgr {
 	/**
 	 * Returns the DBCollection for the requested object
 	 * 
-	 * @param obj
-	 * @return
 	 * @throws FailedRequestException
 	 */
 	public static DBCollection getDBCollection(Class inClass) throws FailedRequestException
@@ -352,10 +326,7 @@ public class DataMgr {
 
 	/**
 	 * Returns an item from the Mongo database
-	 * @param inClass
-	 * @param pkValue
-	 * @return
-	 * @throws UnknownPrimaryKeyException 
+	 * @throws UnknownPrimaryKeyException
 	 * @throws FailedRequestException 
 	 */
 	public static <T> T getFromMongo(Class<T> inClass, Object pkValue) throws FailedRequestException, UnknownPrimaryKeyException
@@ -553,9 +524,6 @@ public class DataMgr {
 	/**
 	 * Resolves a SQL field name based on a class and a class field
 	 * 
-	 * @param typeClass
-	 * @param fieldName
-	 * @return
 	 */
 	public static String resolveSQLField(Class<?> typeClass, String fieldName)
 	{
@@ -591,10 +559,6 @@ public class DataMgr {
 	/**
 	 * Returns an object from the database provided a primary key value
 	 * 
-	 * @param ds
-	 * @param inClass
-	 * @param pkValue
-	 * @return
 	 * @throws SQLException
 	 * @throws UnknownPrimaryKeyException
 	 */
@@ -626,12 +590,6 @@ public class DataMgr {
 	/**
 	 * Returns an object from the database provided a primary key value and supporting SQL
 	 * 
-	 * @param ds
-	 * @param inClass
-	 * @param pkValue
-	 * @param sqlStr
-	 * @param qId
-	 * @return
 	 * @throws SQLException
 	 * @throws UnknownPrimaryKeyException
 	 */
@@ -645,9 +603,6 @@ public class DataMgr {
 	/**
 	 * Returns a count result query for Paging Support
 	 * 
-	 * @param sqlStr
-	 * @param paging
-	 * @return
 	 * @throws SQLException
 	 */
 	public static PagingSupport count(String sqlStr, PagingSupport paging, Object... params)
@@ -666,10 +621,6 @@ public class DataMgr {
 	/**
 	 * Returns a count result query for Paging Support
 	 * 
-	 * @param ds
-	 * @param sqlStr
-	 * @param paging
-	 * @return
 	 * @throws SQLException
 	 */
 	public static PagingSupport count(DataSource ds, String sqlStr, PagingSupport paging, Object... params)  throws SQLException
@@ -688,7 +639,6 @@ public class DataMgr {
 	/**
 	 * Saves or updates an existing object
 	 * 
-	 * @param obj
 	 * @throws SQLException
 	 * @throws UnknownPrimaryKeyException
 	 */
@@ -782,8 +732,6 @@ public class DataMgr {
 	/**
 	 * Saves or updates an item in MongoDB
 	 * 
-	 * @param tbl
-	 * @param obj
 	 * @throws UnknownPrimaryKeyException
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
@@ -897,8 +845,6 @@ public class DataMgr {
 	/**
 	 * Saves or updates data in a SQL database
 	 * 
-	 * @param tbl
-	 * @param obj
 	 * @throws UnknownPrimaryKeyException
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
