@@ -70,7 +70,7 @@ public class MongoQueryRunner {
 
 		private boolean countFromCache;
 		private boolean resultsFromCache;
-	
+
 		private DBObject summary = new BasicDBObject();
 		private String queryUid;
 
@@ -125,6 +125,10 @@ public class MongoQueryRunner {
 			calculateQueryUid();
 
 			return (Long)UDataCache.getInstance().get(queryUid);
+		}
+
+		public String getQueryUid() {
+			return queryUid;
 		}
 
 		public boolean isCountFromCache() {
