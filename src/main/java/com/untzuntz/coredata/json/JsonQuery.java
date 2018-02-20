@@ -237,7 +237,7 @@ public class JsonQuery {
 						try {
 							checkVal = JsonPath.read(document, "$." + inboundKey);
 						} catch (PathNotFoundException pne) {}
-						
+
 						if ("$doesNotContain".equals(key))
 						{
 							if (checkVal == null || !checkVal.toString().toLowerCase().contains(strVal.toLowerCase()))
@@ -248,6 +248,60 @@ public class JsonQuery {
 							if (checkVal != null && checkVal.toString().toLowerCase().contains(strVal.toLowerCase()))
 								checkPassed = true;
 						}
+					}
+					if (checkPassed)
+					{
+						passed++;
+					}
+				}
+				else if ("$eq".equals(key))
+				{
+					boolean checkPassed = false;
+					String strVal = filter.toString();
+					if (inboundKey.indexOf("..") > -1)
+					{
+						List<Object> values = JsonPath.read(document, "$." + inboundKey);
+						for (Object v : values) {
+							if (v != null && v.toString().equals(strVal))
+								checkPassed = true;
+						}
+					}
+					else
+					{
+						Object checkVal = null;
+						try {
+							checkVal = JsonPath.read(document, "$." + inboundKey);
+						} catch (PathNotFoundException pne) {}
+
+						if (checkVal != null && checkVal.toString().equals(strVal))
+							checkPassed = true;
+					}
+					if (checkPassed)
+					{
+						passed++;
+					}
+				}
+				else if ("$eqIgnoreCase".equals(key))
+				{
+					boolean checkPassed = false;
+					String strVal = filter.toString();
+					if (inboundKey.indexOf("..") > -1)
+					{
+						List<Object> values = JsonPath.read(document, "$." + inboundKey);
+						for (Object v : values) {
+							if (v != null && v.toString().equalsIgnoreCase(strVal))
+								checkPassed = true;
+						}
+					}
+					else
+					{
+						Object checkVal = null;
+						try {
+							checkVal = JsonPath.read(document, "$." + inboundKey);
+						} catch (PathNotFoundException pne) {}
+
+						if (checkVal != null && checkVal.toString().equalsIgnoreCase(strVal))
+							checkPassed = true;
 					}
 					if (checkPassed)
 					{
