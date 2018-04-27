@@ -239,10 +239,11 @@ public class MongoQueryRunner {
 			}
 		}
 		long iterateEnd = System.currentTimeMillis();
-		
-		logger.info(String.format("%s | Search [%s] | Sort [%s] | Skip %d | Limit %d => PagingTime %d / IterationTime %d / TotalTime %d CountEnabled: (nocount: %s)",
+
+		long totalTime = (System.currentTimeMillis() - start);
+		logger.info(String.format("%s | Search [%s] | Sort [%s] | Skip %d | Limit %d => PagingTime %d / IterationTime %d / TotalTime %d CountEnabled: (nocount: %s)%s",
 				clazz.getSimpleName(), searchObj, orderByObj, skip, limit,
-				(pagingEnd - pagingStart), (iterateEnd - iterateStart), (System.currentTimeMillis() - start), nocount));
+				(pagingEnd - pagingStart), (iterateEnd - iterateStart), totalTime, nocount, totalTime > 5000 ? " | SLOWQUERY" : ""));
 
 		return ret;
 	}

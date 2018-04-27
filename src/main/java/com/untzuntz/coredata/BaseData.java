@@ -6,6 +6,8 @@ import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -127,6 +129,15 @@ abstract public class BaseData {
 					obj.put(fieldName, getDateFormat().format(ts));
 				else
 					obj.put(fieldName, ts);
+			} else if (object instanceof Duration) {
+				Duration ts = (Duration)object;
+				obj.put(fieldName, ts.getSeconds());
+			} else if (object instanceof ZonedDateTime) {
+				ZonedDateTime ts = (ZonedDateTime) object;
+				if (convertDates)
+					obj.put(fieldName, getDateFormat().format( Date.from(ts.toInstant()) ));
+				else
+					obj.put(fieldName, Date.from(ts.toInstant()));
 			} else if (object != null && object.getClass().isEnum()) {
 				Method m = null;
 				try {

@@ -4,7 +4,7 @@
     <groupId>com.untzuntz.ustack</groupId>
     <artifactId>ustack-core-data-java</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.51</version>
+    <version>1.0.53</version>
     <name>ustack-core-data-java</name>
 	<licenses>
 		<license>
@@ -120,8 +120,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
             <plugin>

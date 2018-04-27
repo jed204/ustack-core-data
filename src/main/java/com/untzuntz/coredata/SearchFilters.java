@@ -5,11 +5,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import com.untzuntz.ustackserverapi.params.types.util.DateRangeObjectId;
 import org.apache.log4j.Logger;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.untzuntz.ustackserverapi.params.types.util.DateRange;
+import org.bson.types.ObjectId;
 
 /**
  * A holding place for one or more additional search parameters
@@ -106,7 +108,7 @@ public class SearchFilters {
 					paramList.add(end);
 				}
 			}
-			else 
+			else
 			{  
 				
 				sql.append(filter.getSqlField());
@@ -176,6 +178,19 @@ public class SearchFilters {
 					search.put(filter.getSqlField(), new BasicDBObject("$lte", end));
 				else if (start != null && end != null)
 					search.put(filter.getSqlField(), new BasicDBObject("$gte", start).append("$lte", end));
+			}
+			else if (value instanceof DateRangeObjectId) {
+
+				DateRange dr = ((DateRangeObjectId)value).range;
+				Date start = dr.getStart();
+				Date end = dr.getEnd();
+				if (start != null && end == null)
+					search.put(filter.getSqlField(), new BasicDBObject("$gte", new ObjectId(start, 0, (short)0, 0)));
+				else if (start == null && end != null)
+					search.put(filter.getSqlField(), new BasicDBObject("$lte", new ObjectId(end, 0, (short)0, 0)));
+				else if (start != null && end != null)
+					search.put(filter.getSqlField(), new BasicDBObject("$gte", new ObjectId(start, 0, (short)0, 0)).append("$lte", new ObjectId(end, 0, (short)0, 0)));
+
 			}
 			else if (value != null)
 			{
