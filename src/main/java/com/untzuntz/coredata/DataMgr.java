@@ -507,6 +507,7 @@ public class DataMgr {
 		    		mbd.getExtraFields().put(fieldName, value);
 				return;
 			}
+			else logger.error(String.format("Failed to find setter named %s", setterName), nse);
 		} catch (Exception e) {
 			logger.error(String.format("Failed to find setter named %s", setterName), e);
 		}
