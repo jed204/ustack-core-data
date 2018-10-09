@@ -384,6 +384,7 @@ public class DataMgr {
 			logger.warn("Unable to create class of type [" + inClass.getName() + "]", e);
 			throw new FailedRequestException("Failed to build Object");
 		} catch (IllegalAccessException e) {
+			logger.error("FAIB", e);
 			throw new FailedRequestException("Invalid Object Requested");
 		} catch (UnknownPrimaryKeyException e) {
 			throw e;
@@ -409,7 +410,9 @@ public class DataMgr {
     	{
 	    	try {
 	    		checkType = tField.getType().newInstance();
-	    	} catch (Exception e) {}
+	    	} catch (Exception e) {
+	    		//logger.error(setterName + " / " + tField.getType() + " | FAILED", e);
+			}
     	}
     	
 //    	if (checkType != null)
@@ -424,18 +427,17 @@ public class DataMgr {
     	{
     		Class cls = target.getClass();
     		//logger.debug(String.format("Getting '%s' from class '%s'", fieldName, target.getClass().getName()));
-    		Field f = cls.getDeclaredField(fieldName);
-    		if (f == null || f.isSynthetic())
-    			return;
+			Field f = cls.getDeclaredField(fieldName);
+			if (f == null || f.isSynthetic())
+				return;
 
+			if (f.getGenericType().getClass().equals(Class.class))
+			{
+				// we have a generic array
+
+			}
     		List objectList = new ArrayList();
-    		
-    		if (f.getGenericType().getClass().equals(Class.class))
-    		{
-    			// we have a generic array
-    			
-    		}
-    		
+
     		//logger.info(String.format("Getting '%s' from class '%s' => '%s'", fieldName, target.getClass().getName(), f.getGenericType().getClass().getName()));
     		
 			ParameterizedType listTypeParam = (ParameterizedType)f.getGenericType();

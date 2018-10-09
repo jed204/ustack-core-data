@@ -147,21 +147,27 @@ public class MongoQueryRunner {
 			this.resultsFromCache = resultsFromCache;
 		}
 	}
-	
-    /**
-     * Executes a query against the MongoDB database for the request class and collection
-     * 
-     * @throws FailedRequestException
-     * @throws UnknownPrimaryKeyException
-     * @throws UnhandledException 
-     * @throws SecurityException
-     */
-	public static <T> List<T> runListQuery(Class<T> clazz, SearchFilters filters, OrderBy orderBy, PagingSupport paging, DBObject additionalSearch, ExportFormat exportFormat, Integer maxTimeSeconds, CachePlan cache) throws FailedRequestException, UnknownPrimaryKeyException, UnhandledException
-	{
+
+	public static <T> List<T> runListQuery(Class<T> clazz, SearchFilters filters, OrderBy orderBy, PagingSupport paging, DBObject additionalSearch, ExportFormat exportFormat, Integer maxTimeSeconds, CachePlan cache) throws FailedRequestException, UnknownPrimaryKeyException, UnhandledException {
+
 		DBTableMap tbl = clazz.getAnnotation(DBTableMap.class);
 		if (tbl == null)
 			throw new FailedRequestException("Cannot persist or grab class from data source : " + clazz.getName());
-		
+
+		DBCollection col = MongoDB.getCollection(DataMgr.getDb(tbl), tbl.dbTable());
+		return runListQuery(col, clazz, filters, orderBy, paging, additionalSearch, exportFormat, maxTimeSeconds, cache);
+	}
+
+	/**
+	 * Executes a query against the MongoDB database for the request class and collection
+	 *
+	 * @throws FailedRequestException
+	 * @throws UnknownPrimaryKeyException
+	 * @throws UnhandledException
+	 * @throws SecurityException
+	 */
+	public static <T> List<T> runListQuery(DBCollection col, Class<T> clazz, SearchFilters filters, OrderBy orderBy, PagingSupport paging, DBObject additionalSearch, ExportFormat exportFormat, Integer maxTimeSeconds, CachePlan cache) throws FailedRequestException, UnknownPrimaryKeyException, UnhandledException
+	{
 		List<T> ret = new ArrayList<T>();
 		
 		// search parameters
@@ -194,7 +200,6 @@ public class MongoQueryRunner {
 		long start = System.currentTimeMillis();
 		
 		// run the actual query
-		DBCollection col = MongoDB.getCollection(DataMgr.getDb(tbl), tbl.dbTable());
 		DBCursor cur = col.find(searchObj);
 
 		if (maxTimeSeconds != null) {

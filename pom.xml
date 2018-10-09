@@ -4,7 +4,7 @@
     <groupId>com.untzuntz.ustack</groupId>
     <artifactId>ustack-core-data-java</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.53</version>
+    <version>1.0.54</version>
     <name>ustack-core-data-java</name>
 	<licenses>
 		<license>
