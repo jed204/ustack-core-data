@@ -113,7 +113,9 @@ public class MongoQueryRunner {
 			}
 
 			logger.info(String.format("Setting Cache [%s] => %d", queryUid, value));
-			UDataCache.getInstance().set(queryUid, countCacheTime, value);
+			if (UOpts.getCacheEnabled()) {
+				UDataCache.getInstance().set(queryUid, countCacheTime, value);
+			}
 		}
 
 		public Long getCacheCount() {
@@ -124,7 +126,10 @@ public class MongoQueryRunner {
 
 			calculateQueryUid();
 
-			return (Long)UDataCache.getInstance().get(queryUid);
+			if (UOpts.getCacheEnabled()) {
+				return (Long)UDataCache.getInstance().get(queryUid);
+			}
+			return null;
 		}
 
 		public String getQueryUid() {
