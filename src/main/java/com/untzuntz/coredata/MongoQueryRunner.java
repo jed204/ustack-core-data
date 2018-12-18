@@ -11,6 +11,7 @@ import com.untzuntz.coredata.exceptions.FieldSetException;
 import com.untzuntz.coredata.exceptions.UnknownPrimaryKeyException;
 import com.untzuntz.ustack.data.MongoDB;
 import com.untzuntz.ustack.data.UDataCache;
+import com.untzuntz.ustack.main.UOpts;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.UnhandledException;
 import org.apache.log4j.Logger;
@@ -112,8 +113,8 @@ public class MongoQueryRunner {
 				return;
 			}
 
-			logger.info(String.format("Setting Cache [%s] => %d", queryUid, value));
 			if (UOpts.getCacheEnabled()) {
+				logger.info(String.format("Setting Cache [%s] => %d", queryUid, value));
 				UDataCache.getInstance().set(queryUid, countCacheTime, value);
 			}
 		}
