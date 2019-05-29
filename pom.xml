@@ -4,7 +4,7 @@
     <groupId>com.untzuntz.ustack</groupId>
     <artifactId>ustack-core-data-java</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.54</version>
+    <version>1.0.66</version>
     <name>ustack-core-data-java</name>
 	<licenses>
 		<license>
@@ -28,7 +28,7 @@
 		<dependency>
 			<groupId>org.mongodb</groupId>
 			<artifactId>mongo-java-driver</artifactId>
-			<version>3.4.2</version>
+			<version>3.10.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId> 

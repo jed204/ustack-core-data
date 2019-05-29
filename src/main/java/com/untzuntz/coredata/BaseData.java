@@ -1,5 +1,15 @@
 package com.untzuntz.coredata;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
+import com.untzuntz.coredata.anno.DBFieldMap;
+import org.bson.BasicBSONObject;
+import org.bson.json.JsonWriterSettings;
+import org.bson.types.ObjectId;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -12,16 +22,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
-
-import org.bson.BasicBSONObject;
-import org.bson.types.ObjectId;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
-import com.untzuntz.coredata.anno.DBFieldMap;
 
 /**
  * A core element to support the API responses such as JSON output
@@ -193,6 +193,14 @@ abstract public class BaseData {
 	
 	public void toDBObject(DBObject o) {
 		// stub - do nothing
+	}
+
+	public String toString() {
+		BasicDBObject obj = (BasicDBObject) toDBObject(true, true);
+		JsonWriterSettings settings = JsonWriterSettings.builder()
+				.int64Converter((value, writer) -> writer.writeNumber(value.toString()))
+				.build();
+		return obj.toJson(settings);
 	}
 	
 }
