@@ -49,7 +49,7 @@ abstract public class BaseData {
 	{
 		return toDBObjectStatic(this, dumpSubObjects, convertDates);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public static DBObject toDBObjectStatic(Object sourceObject, boolean dumpSubObjects, boolean convertDates)
 	{
@@ -195,6 +195,7 @@ abstract public class BaseData {
 		// stub - do nothing
 	}
 
+	@Override
 	public String toString() {
 		BasicDBObject obj = (BasicDBObject) toDBObject(true, true);
 		JsonWriterSettings settings = JsonWriterSettings.builder()
