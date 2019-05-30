@@ -8,14 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.CreationHelper;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import com.mongodb.DBCursor;
@@ -118,11 +111,11 @@ public class ExcelExportFormat implements ExportFormat,OutputCallback {
 		
 		// AQUA background
 		headerStyle.setFillForegroundColor(IndexedColors.AQUA.getIndex());
-		headerStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+		headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
 		// Bold text
 		Font font = wb.createFont();
-	    font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+		font.setBold(true);
 	    headerStyle.setFont(font);
 	    
 	    return headerStyle;
@@ -249,7 +242,7 @@ public class ExcelExportFormat implements ExportFormat,OutputCallback {
 			if (backgroundColor != null)
 			{
 				style.setFillForegroundColor(IndexedColors.valueOf(backgroundColor).getIndex());
-				style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+				style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 			}
 			formats.put(color, style);
 		}

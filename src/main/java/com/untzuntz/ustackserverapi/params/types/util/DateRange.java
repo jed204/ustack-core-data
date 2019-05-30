@@ -236,7 +236,9 @@ public class DateRange {
 						append = 30;
 					if (month == 2)
 						append = 28;
-					
+					if (month == 12)
+						append = 31;
+
 					fix.append(append);
 				}
 				if (fix.length() == 8)
