@@ -1,13 +1,11 @@
 package com.untzuntz.coredata;
 
-import com.Ostermiller.util.MD5;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.untzuntz.coredata.anno.DBTableMap;
 import com.untzuntz.coredata.exceptions.FailedRequestException;
-import com.untzuntz.coredata.exceptions.FieldSetException;
 import com.untzuntz.coredata.exceptions.UnknownPrimaryKeyException;
 import com.untzuntz.ustack.data.MongoDB;
 import com.untzuntz.ustack.data.UDataCache;

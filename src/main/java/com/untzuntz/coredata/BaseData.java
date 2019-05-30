@@ -1,5 +1,15 @@
 package com.untzuntz.coredata;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
+import com.untzuntz.coredata.anno.DBFieldMap;
+import org.bson.BasicBSONObject;
+import org.bson.json.JsonWriterSettings;
+import org.bson.types.ObjectId;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -12,16 +22,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
-
-import org.bson.BasicBSONObject;
-import org.bson.types.ObjectId;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
-import com.untzuntz.coredata.anno.DBFieldMap;
 
 /**
  * A core element to support the API responses such as JSON output
@@ -49,7 +49,7 @@ abstract public class BaseData {
 	{
 		return toDBObjectStatic(this, dumpSubObjects, convertDates);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public static DBObject toDBObjectStatic(Object sourceObject, boolean dumpSubObjects, boolean convertDates)
 	{
@@ -177,6 +177,8 @@ abstract public class BaseData {
 				//System.err.println(key + " => " + extras.get(key));
 				if (convertDates && (extras.get(key) instanceof Date || extras.get(key) instanceof Timestamp))
 					obj.put(key, getDateFormat().format(extras.get(key)));
+				else if (extras.get(key) instanceof Long || extras.get(key) instanceof Integer)
+					obj.put(key, extras.get(key).toString());
 				else
 					obj.put(key, extras.get(key));
 			}
@@ -193,6 +195,15 @@ abstract public class BaseData {
 	
 	public void toDBObject(DBObject o) {
 		// stub - do nothing
+	}
+
+	@Override
+	public String toString() {
+		BasicDBObject obj = (BasicDBObject) toDBObject(true, true);
+		JsonWriterSettings settings = JsonWriterSettings.builder()
+				.int64Converter((value, writer) -> writer.writeNumber(value.toString()))
+				.build();
+		return obj.toJson(settings);
 	}
 	
 }
