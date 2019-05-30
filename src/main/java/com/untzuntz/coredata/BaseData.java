@@ -177,6 +177,8 @@ abstract public class BaseData {
 				//System.err.println(key + " => " + extras.get(key));
 				if (convertDates && (extras.get(key) instanceof Date || extras.get(key) instanceof Timestamp))
 					obj.put(key, getDateFormat().format(extras.get(key)));
+				else if (extras.get(key) instanceof Long || extras.get(key) instanceof Integer)
+					obj.put(key, extras.get(key).toString());
 				else
 					obj.put(key, extras.get(key));
 			}
