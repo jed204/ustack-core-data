@@ -469,12 +469,39 @@ public class DataMgr {
     	}
     	else if (value instanceof DBObject)
     	{
-    		Field f = target.getClass().getDeclaredField(fieldName);
-    		if (f == null)
+			Field field = null;
+			Class cls = target.getClass();
+    		try{
+    			field = cls.getDeclaredField(fieldName);
+			} catch (NoSuchFieldException e){
+				DBTableMap annotation = (DBTableMap) cls.getAnnotation(DBTableMap.class);
+
+				if (annotation == null) {
+					throw e;
+				}
+
+				if (annotation.includeParent()) {
+					Class superCls = cls.getSuperclass();
+					while (superCls != null && field == null) {
+						try {
+							field = superCls.getDeclaredField(fieldName);
+						} catch(NoSuchFieldException ex) {
+							superCls = superCls.getSuperclass();
+						}
+					}
+
+					if (field == null) {
+						throw e;
+					}
+				} else {
+					throw e;
+				}
+			}
+    		if (field == null)
     			return;
     		
     		if (!(value instanceof DBObject))
-    			value = getObjectFromDBObject(f.getType(), (DBObject)value);
+    			value = getObjectFromDBObject(field.getType(), (DBObject)value);
 
     		paramType = DBObject.class;
     	}
