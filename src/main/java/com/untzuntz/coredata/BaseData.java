@@ -161,8 +161,7 @@ abstract public class BaseData {
 					}
 				}
 			} else if (object instanceof Long) {
-				Number num = (Number) object;
-				obj.put(fieldName, num);
+				obj.put(fieldName, object.toString());
 			} else {
 				obj.put(fieldName, object);
 			}
@@ -181,8 +180,7 @@ abstract public class BaseData {
 				if (convertDates && (extras.get(key) instanceof Date || extras.get(key) instanceof Timestamp))
 					obj.put(key, getDateFormat().format(extras.get(key)));
 				else if (extras.get(key) instanceof Long) {
-					Number num = (Number) extras.get(key);
-					obj.put(key, num);
+					obj.put(key, extras.get(key).toString());
 				}
 				else
 					obj.put(key, extras.get(key));
