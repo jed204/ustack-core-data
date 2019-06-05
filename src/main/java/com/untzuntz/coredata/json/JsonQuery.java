@@ -1,15 +1,5 @@
 package com.untzuntz.coredata.json;
 
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.log4j.Logger;
-
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
@@ -17,8 +7,12 @@ import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.untzuntz.coredata.exceptions.UnknownFilterKey;
-
 import net.minidev.json.JSONArray;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+
+import java.text.DecimalFormat;
+import java.util.*;
 
 public class JsonQuery {
 
@@ -262,7 +256,7 @@ public class JsonQuery {
 					{
 						List<Object> values = JsonPath.read(document, "$." + inboundKey);
 						for (Object v : values) {
-							if (v != null && v.toString().equals(strVal))
+							if (v != null && StringUtils.equals(extractValue(v), strVal))
 								checkPassed = true;
 						}
 					}
@@ -273,8 +267,10 @@ public class JsonQuery {
 							checkVal = JsonPath.read(document, "$." + inboundKey);
 						} catch (PathNotFoundException pne) {}
 
-						if (checkVal != null && checkVal.toString().equals(strVal))
+						if (checkVal != null && StringUtils.equals(extractValue(checkVal), strVal)) {
 							checkPassed = true;
+						}
+
 					}
 					if (checkPassed)
 					{
@@ -289,7 +285,7 @@ public class JsonQuery {
 					{
 						List<Object> values = JsonPath.read(document, "$." + inboundKey);
 						for (Object v : values) {
-							if (v != null && v.toString().equalsIgnoreCase(strVal))
+							if (v != null && StringUtils.equals(extractValue(v), strVal))
 								checkPassed = true;
 						}
 					}
@@ -300,7 +296,7 @@ public class JsonQuery {
 							checkVal = JsonPath.read(document, "$." + inboundKey);
 						} catch (PathNotFoundException pne) {}
 
-						if (checkVal != null && checkVal.toString().equalsIgnoreCase(strVal))
+						if (checkVal != null && StringUtils.equals(extractValue(checkVal), strVal))
 							checkPassed = true;
 					}
 					if (checkPassed)
@@ -374,7 +370,7 @@ public class JsonQuery {
 					{
 						List<Object> values = JsonPath.read(document, "$." + inboundKey);
 						for (Object v : values) {
-							if (!strVal.equals(v.toString()))
+							if (!StringUtils.equals(extractValue(v), strVal))
 								checkPassed = true;
 						}
 					}
@@ -385,7 +381,7 @@ public class JsonQuery {
 							checkVal = JsonPath.read(document, "$." + inboundKey);
 						} catch (PathNotFoundException pne) {}
 						
-						if (checkVal == null || !strVal.equals(checkVal.toString()))
+						if (checkVal == null || !StringUtils.equals(extractValue(checkVal), strVal))
 							checkPassed = true;
 					}
 					if (checkPassed)
@@ -412,7 +408,7 @@ public class JsonQuery {
 					List<Object> values = JsonPath.read(document, "$." + key);
 					boolean hasValue = false;
 					for (Object v : values) {
-						if (strVal.equals(v.toString()))
+						if (StringUtils.equals(extractValue(v), strVal))
 							hasValue = true;
 					}
 					
@@ -426,7 +422,7 @@ public class JsonQuery {
 						checkVal = JsonPath.read(document, "$." + key);
 					} catch (PathNotFoundException pne) {}
 					
-					if (checkVal != null && strVal.equals(checkVal.toString()))
+					if (checkVal != null && StringUtils.equals(extractValue(checkVal), strVal))
 						checkPassed = true;
 				}
 				if (checkPassed)
@@ -505,7 +501,24 @@ public class JsonQuery {
 	
 	private static enum FilterMode {
 		AND,
-		OR;
+		OR
+	}
+
+	/**
+	 * This helper method extracts values from numbers stored in Extended JSON format such as
+	 * { "b" : { "$numberLong" : "14" } } instead of simply { "b" : "14" }
+	 * @param object
+	 * @return
+	 */
+	private String extractValue(Object object) {
+		if (object instanceof Map && !((Map)object).isEmpty()) {
+			Iterator mIt = ((Map)object).keySet().iterator();
+			String mKey = (String) mIt.next();
+			if (mKey.startsWith("$number")) {
+				return ((Map)object).get(mKey).toString();
+			}
+		}
+		return object.toString();
 	}
 	
 }
